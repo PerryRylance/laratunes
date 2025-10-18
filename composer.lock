@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "73cddab7e2eedbf6718beabd9c4d8011",
+    "content-hash": "f441d312ec3e3c50c9cb72c3c342e690",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2078,6 +2078,73 @@
             "time": "2025-08-22T14:27:06+00:00"
         },
         {
+            "name": "james-heinrich/getid3",
+            "version": "v1.9.24",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/JamesHeinrich/getID3.git",
+                "reference": "1e11b9b6eb468b522fe604a42a9fdc8ee759bf8a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/JamesHeinrich/getID3/zipball/1e11b9b6eb468b522fe604a42a9fdc8ee759bf8a",
+                "reference": "1e11b9b6eb468b522fe604a42a9fdc8ee759bf8a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "php-parallel-lint/php-parallel-lint": "^1.0"
+            },
+            "suggest": {
+                "ext-SimpleXML": "SimpleXML extension is required to analyze RIFF/WAV/BWF audio files (also requires `ext-libxml`).",
+                "ext-com_dotnet": "COM extension is required when loading files larger than 2GB on Windows.",
+                "ext-ctype": "ctype extension is required when loading files larger than 2GB on 32-bit PHP (also on 64-bit PHP on Windows) or executing `getid3_lib::CopyTagsToComments`.",
+                "ext-dba": "DBA extension is required to use the DBA database as a cache storage.",
+                "ext-exif": "EXIF extension is required for graphic modules.",
+                "ext-iconv": "iconv extension is required to work with different character sets (when `ext-mbstring` is not available).",
+                "ext-json": "JSON extension is required to analyze Apple Quicktime videos.",
+                "ext-libxml": "libxml extension is required to analyze RIFF/WAV/BWF audio files.",
+                "ext-mbstring": "mbstring extension is required to work with different character sets.",
+                "ext-mysql": "MySQL extension is required to use the MySQL database as a cache storage (deprecated in PHP 5.5, removed in PHP >= 7.0, use `ext-mysqli` instead).",
+                "ext-mysqli": "MySQLi extension is required to use the MySQL database as a cache storage.",
+                "ext-rar": "RAR extension is required for RAR archive module.",
+                "ext-sqlite3": "SQLite3 extension is required to use the SQLite3 database as a cache storage.",
+                "ext-xml": "XML extension is required for graphic modules to analyze the XML metadata.",
+                "ext-zlib": "Zlib extension is required for archive modules and compressed metadata."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.9.x-dev"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "getid3/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-1.0-or-later",
+                "LGPL-3.0-only",
+                "MPL-2.0"
+            ],
+            "description": "PHP script that extracts useful information from popular multimedia file formats",
+            "homepage": "https://www.getid3.org/",
+            "keywords": [
+                "codecs",
+                "php",
+                "tags"
+            ],
+            "support": {
+                "issues": "https://github.com/JamesHeinrich/getID3/issues",
+                "source": "https://github.com/JamesHeinrich/getID3/tree/v1.9.24"
+            },
+            "time": "2025-10-09T17:48:17+00:00"
+        },
+        {
             "name": "kirschbaum-development/eloquent-power-joins",
             "version": "4.2.8",
             "source": {
@@ -2139,6 +2206,90 @@
                 "source": "https://github.com/kirschbaum-development/eloquent-power-joins/tree/4.2.8"
             },
             "time": "2025-08-14T18:43:05+00:00"
+        },
+        {
+            "name": "kiwilan/php-audio",
+            "version": "4.0.01",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kiwilan/php-audio.git",
+                "reference": "028842cace360e8ba489df42ef24ebabb43a9c23"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kiwilan/php-audio/zipball/028842cace360e8ba489df42ef24ebabb43a9c23",
+                "reference": "028842cace360e8ba489df42ef24ebabb43a9c23",
+                "shasum": ""
+            },
+            "require": {
+                "james-heinrich/getid3": "^v1.9.22",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.2",
+                "pestphp/pest": "^2.0",
+                "phpstan/phpstan": "^1.12",
+                "spatie/ray": "^1.28"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Kiwilan\\Audio\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ewilan Rivière",
+                    "email": "ewilan.riviere@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP package to parse and update audio files metadata, with `JamesHeinrich/getID3`.",
+            "homepage": "https://github.com/kiwilan/php-audio",
+            "keywords": [
+                "aif",
+                "aifc",
+                "aiff",
+                "alac",
+                "audio",
+                "audiobook",
+                "flac",
+                "id3",
+                "id3v1",
+                "id3v2",
+                "m4a",
+                "m4b",
+                "m4v",
+                "mka",
+                "mkv",
+                "mp3",
+                "mp4",
+                "music",
+                "ogg",
+                "opus",
+                "php",
+                "spx",
+                "tta",
+                "wav",
+                "webm",
+                "wma",
+                "wv"
+            ],
+            "support": {
+                "issues": "https://github.com/kiwilan/php-audio/issues",
+                "source": "https://github.com/kiwilan/php-audio/tree/v4.0.01"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/kiwilan",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-10-03T16:57:29+00:00"
         },
         {
             "name": "laravel/fortify",

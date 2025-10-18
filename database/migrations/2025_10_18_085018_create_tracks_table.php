@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('tracks', function (Blueprint $table) {
             $table->id();
+            $table->string('title')->nullable();
+			$table->string('artist')->nullable();
+			$table->string('path');
+			$table->string('hash');
+			$table->integer('plays')->default(0);
+			$table->timestamp('last_played_at')->nullable();
             $table->timestamps();
         });
     }
