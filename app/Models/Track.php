@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Observers\TrackObserver;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use InvalidArgumentException;
 use Kiwilan\Audio\Audio;
 
+#[ObservedBy([TrackObserver::class])]
 class Track extends Model
 {
     /** @use HasFactory<\Database\Factories\TrackFactory> */

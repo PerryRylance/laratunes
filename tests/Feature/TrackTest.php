@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Tracks\Pages\CreateTrack;
 use App\Filament\Resources\Tracks\Pages\ListTracks;
 use App\Models\Track;
 use App\Models\User;
@@ -9,12 +10,16 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 use Tests\TestCase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class TrackTest extends TestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
+
+        Storage::fake('media');
 
         $this->actingAs(User::factory()->create());
     }
@@ -89,17 +94,81 @@ class TrackTest extends TestCase
 
     public function testSortByDownVotes(): void
     {
-        
+
+    }
+
+    public function testLoadCreatePage(): void
+    {
+        Livewire::test(CreateTrack::class)
+            ->assertOk();
     }
 
     public function testCreate(): void
     {
+        $file = UploadedFile::fake()->create('test.mp3', 100, 'audio/mpeg');
 
+        Livewire::test(CreateTrack::class)
+            ->fillForm([
+                'attachment' => $file
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertRedirect();
+        
+        $this->assertTrue(Storage::disk('media')->exists('test.mp3'));
+
+        $this->assertDatabaseHas(Track::class, [
+            'path' => 'test.mp3',
+            'hash' => md5("")
+        ]);
     }
 
-    public function testCreateReadsMetadata(): void
+    private function testCreateReadsMetadata(string $source, array $expected): void
     {
+        $content = file_get_contents($source);
+        $filename = basename($source);
 
+        $file = UploadedFile::fake()->createWithContent($filename, $content);
+
+        Livewire::test(CreateTrack::class)
+            ->fillForm([
+                'attachment' => $file
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertRedirect();
+        
+        $this->assertTrue(Storage::disk('media')->exists($filename));
+
+        $this->assertDatabaseHas(Track::class, [
+            'path' => $filename,
+            'hash' => md5($content),
+            ...$expected
+        ]);
+    }
+
+    public function testCreateReadsMp3Metadata(): void
+    {
+        $this->testCreateReadsMetadata('./tests/Fixtures/media/metadata.mp3', [
+            'title' => 'Test MP3 Title',
+            'artist' => 'Test MP3 Artist',
+        ]);
+    }
+
+    public function testCreateReadsOggMetadata(): void
+    {
+        $this->testCreateReadsMetadata('./tests/Fixtures/media/metadata.ogg', [
+            'title' => 'Test OGG Title',
+            'artist' => 'Test OGG Artist',
+        ]);
+    }
+
+    public function testCreateReadsFlacMetadata(): void
+    {
+        $this->testCreateReadsMetadata('./tests/Fixtures/media/metadata.flac', [
+            'title' => 'Test FLAC Title',
+            'artist' => 'Test FLAC Artist',
+        ]);
     }
 
     public function testCreateIdentifiesDuplicate(): void

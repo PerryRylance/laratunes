@@ -60,6 +60,12 @@ return [
             'report' => false,
         ],
 
+        'media' => [
+            'driver' => 'local',
+            'root' => '/mnt/media',
+            'visibility' => 'private'
+        ],
+
     ],
 
     /*
