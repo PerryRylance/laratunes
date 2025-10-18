@@ -178,7 +178,26 @@ class TrackTest extends TestCase
 
     public function testCreateFailsWithUnsupportedFile(): void
     {
+        $source = './tests/Fixtures/media/unsupported.media';
 
+        $content = file_get_contents($source);
+        $filename = basename($source);
+
+        $file = UploadedFile::fake()->createWithContent($filename, $content);
+
+        Livewire::test(CreateTrack::class)
+            ->fillForm([
+                'attachment' => $file
+            ])
+            ->call('create')
+            ->assertNotNotified()
+            ->assertNoRedirect();
+        
+        $this->assertFalse(Storage::disk('media')->exists($filename));
+
+        $this->assertDatabaseMissing(Track::class, [
+            'path' => $filename
+        ]);
     }
 
     public function testView(): void
