@@ -26,7 +26,7 @@ class TrackTest extends TestCase
 
     public function testIndex(): void
     {
-        $tracks = Track::factory()->count(3)->create();
+        $tracks = Track::factory()->uploaded()->count(3)->create();
 
         Livewire::test(ListTracks::class)
             ->assertOk()
@@ -35,7 +35,7 @@ class TrackTest extends TestCase
 
     public function testSearchByTitleAndArtist(): void
     {
-        $tracks = Track::factory()->count(5)->create();
+        $tracks = Track::factory()->uploaded()->count(5)->create();
 
         Livewire::test(ListTracks::class)
             ->assertCanSeeTableRecords($tracks)
@@ -49,7 +49,7 @@ class TrackTest extends TestCase
 
     public function testSortByTitleAndArtist(): void
     {
-        $tracks = Track::factory()->count(5)->create();
+        $tracks = Track::factory()->uploaded()->count(5)->create();
 
         Livewire::test(ListTracks::class)
             ->assertCanSeeTableRecords($tracks)
@@ -65,7 +65,7 @@ class TrackTest extends TestCase
 
     public function testSortByPlayCount(): void
     {
-        $tracks = Track::factory()->count(5)->create();
+        $tracks = Track::factory()->uploaded()->count(5)->create();
 
         Livewire::test(ListTracks::class)
             ->assertCanSeeTableRecords($tracks)
@@ -77,7 +77,7 @@ class TrackTest extends TestCase
 
     public function testSortByLastPlayed(): void
     {
-        $tracks = Track::factory()->count(5)->create();
+        $tracks = Track::factory()->uploaded()->count(5)->create();
 
         Livewire::test(ListTracks::class)
             ->assertCanSeeTableRecords($tracks)
@@ -173,7 +173,7 @@ class TrackTest extends TestCase
 
     public function testCreateIdentifiesDuplicate(): void
     {
-
+        $source = './tests/Fixtures/media/8-bit-takeover-367276.mp3';
     }
 
     public function testCreateFailsWithUnsupportedFile(): void
@@ -222,7 +222,7 @@ class TrackTest extends TestCase
 
     public function testBulkDelete(): void
     {
-        $tracks = Track::factory()->count(5)->create();
+        $tracks = Track::factory()->uploaded()->count(5)->create();
 
         Livewire::test(ListTracks::class)
             ->assertCanSeeTableRecords($tracks)
@@ -240,6 +240,11 @@ class TrackTest extends TestCase
     }
 
     public function testDeleteRemovesVotes(): void
+    {
+
+    }
+
+    public function testDeleteRemoveFromOlaf(): void
     {
 
     }
