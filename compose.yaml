@@ -23,6 +23,17 @@ services:
         networks:
             - sail
         depends_on: {  }
+    olaf:
+        build:
+            context: ./Olaf
+            dockerfile: ../docker/olaf/Dockerfile
+        command: ["php", "-S", "0.0.0.0:5000", "-t", "/var/www/html"]
+        ports:
+            - '5000:5000'
+        volumes:
+            - ~/.olaf/docker_dbs:/root/.olaf
+            - ./docker/olaf/scripts:/var/www/html
+            - ./tests/Fixtures/media:/root/audio
 networks:
     sail:
         driver: bridge
