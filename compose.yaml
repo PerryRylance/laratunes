@@ -22,7 +22,8 @@ services:
             - './tests/Fixtures/media:/mnt/media'
         networks:
             - sail
-        depends_on: {  }
+        depends_on:
+            - olaf
     olaf:
         build:
             context: ./Olaf
@@ -31,7 +32,7 @@ services:
         ports:
             - '5000:5000'
         volumes:
-            - ~/.olaf/docker_dbs:/root/.olaf
+            - ./.olaf/docker_dbs:/root/.olaf
             - ./docker/olaf/scripts:/var/www/html
             - ./tests/Fixtures/media:/root/audio
 networks:

@@ -28,4 +28,4 @@ if(!file_exists($absolute))
 
 $escaped = escapeshellarg($absolute);
 
-echo shell_exec("/usr/local/bin/olaf query --fragmented $escaped");
+echo shell_exec("/usr/local/bin/olaf query --no-identity-match --fragmented $escaped");
