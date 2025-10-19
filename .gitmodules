@@ -1,0 +1,3 @@
+[submodule "seek-tune"]
+	path = seek-tune
+	url = https://github.com/cgzirim/seek-tune.git
