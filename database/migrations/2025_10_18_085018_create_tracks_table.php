@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title')->nullable();
 			$table->string('artist')->nullable();
 			$table->string('path');
-			$table->string('hash');
+			$table->string('hash'); // TODO: Unique?
 			$table->integer('plays')->default(0);
 			$table->timestamp('last_played_at')->nullable();
             $table->timestamps();

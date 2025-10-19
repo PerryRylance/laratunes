@@ -17,9 +17,16 @@ class TrackObserver
 
         $track->hash = md5_file($path);
 
-        $audio = Audio::read($path);
+        if($track->title === null || $track->artist === null)
+        {
+            $audio = Audio::read($path);
 
-        $track->title = $audio->getTitle();
-        $track->artist = $audio->getArtist();
+            // NB: Attempt to get title and artist from the metadata if not already specified. The interface will try this first - tests will populate this though.
+            if($track->title === null)
+                $track->title = $audio->getTitle();
+
+            if($track->artist === null)
+                $track->artist = $audio->getArtist();
+        }
     }
 }
