@@ -6,6 +6,7 @@ use App\Filament\Resources\Tracks\Pages\CreateTrack;
 use App\Filament\Resources\Tracks\Pages\ListTracks;
 use App\Models\Track;
 use App\Models\User;
+use App\Facades\Olaf;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
@@ -19,6 +20,7 @@ class TrackTest extends TestCase
     {
         parent::setUp();
 
+        Olaf::fake();
         Storage::fake('media');
 
         $this->actingAs(User::factory()->create());
@@ -169,11 +171,6 @@ class TrackTest extends TestCase
             'title' => 'Test FLAC Title',
             'artist' => 'Test FLAC Artist',
         ]);
-    }
-
-    public function testCreateIdentifiesDuplicate(): void
-    {
-        $source = './tests/Fixtures/media/8-bit-takeover-367276.mp3';
     }
 
     public function testCreateFailsWithUnsupportedFile(): void

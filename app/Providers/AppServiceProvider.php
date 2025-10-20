@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\OlafService;
+use App\Support\Olaf;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(OlafService::class, fn() => new \App\Services\OlafService);
     }
 
     /**

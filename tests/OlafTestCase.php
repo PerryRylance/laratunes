@@ -2,13 +2,12 @@
 
 namespace Tests;
 
-use App\Support\Olaf;
+use App\Facades\Olaf;
 
 class OlafTestCase extends TestCase
 {
     protected function afterRefreshingDatabase()
     {
-        $olaf = new Olaf();
-        $olaf->reset();
+        Olaf::reset();
     }
 }

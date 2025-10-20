@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Track;
+use App\Facades\Olaf;
 use Illuminate\Support\Facades\Storage;
 use Kiwilan\Audio\Audio;
 
@@ -28,5 +29,21 @@ class TrackObserver
             if($track->artist === null)
                 $track->artist = $audio->getArtist();
         }
+    }
+
+    public function created(Track $track): void
+    {
+        Olaf::store($track->path);
+
+        $duplicates = Olaf::query($track->path);
+
+        if($duplicates->items->isEmpty())
+            return;
+
+        $paths = $duplicates->items->pluck('file')->unique();
+        $tracks = Track::whereIn('path', $paths)->get();
+
+        foreach($tracks as $original)
+            $original->duplicates()->attach($track);
     }
 }

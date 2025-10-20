@@ -5,8 +5,10 @@ namespace App\Support\Olaf;
 use League\Csv\Reader;
 use Illuminate\Support\Collection;
 
-class QueryResults extends Collection
+class QueryResults
 {
+    public readonly Collection $items;
+
     public function __construct(string $filename, string $raw)
     {
         $results = [];
@@ -32,14 +34,12 @@ class QueryResults extends Collection
             if($confidence === 0) // TODO: Or some threshold?
                 continue;
 
-            $results []= (object)[
+            $results []= [
                 'confidence' => $confidence,
                 'file' => preg_replace('/^\/root\/audio\//', '', $record[7])
             ];
         }
 
-        $items = (new Collection($results))->sortByDesc('confidence')->values()->toArray();
-
-        parent::__construct($items);
+        $this->items = (new Collection($results))->sortByDesc('confidence')->values();
     }
 }
