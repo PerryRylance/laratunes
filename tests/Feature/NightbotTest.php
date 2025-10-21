@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Facades\NowPlaying;
 use App\Models\Track;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Testing\TestResponse;
@@ -91,14 +92,15 @@ class NightbotTest extends TestCase
 
     private function testVoteSuccessful(string $type): void
     {
+        NowPlaying::fake();
+
         $hash = '925bf0783aa48446bfe8181686525b6e';
 
         try{
             $track = Track::whereHash($hash)->firstOrFail();
         }catch(ModelNotFoundException) {
-            $track = Track::factory()->create([
-                'hash' => $hash
-            ]);
+            $track = Track::factory()->uploaded()->create();
+            $track->update(['hash' => $hash]);
         }
 
         $emoji = match($type) {

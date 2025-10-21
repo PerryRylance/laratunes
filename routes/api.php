@@ -10,6 +10,5 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::prefix('/nightbot')
-	->middleware([NightbotAuth::class, NightbotHeaders::class])
-    ->get('/vote', [NightbotController::class, 'vote']);
+Route::middleware([NightbotAuth::class, NightbotHeaders::class])
+    ->get('/nightbot/vote', [NightbotController::class, 'vote']);

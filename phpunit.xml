@@ -28,5 +28,6 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="NIGHTBOT_API_TOKEN" value="test-nightbot-api-token-do-not-use"/>
     </php>
 </phpunit>
