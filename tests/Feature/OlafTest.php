@@ -120,4 +120,15 @@ class OlafTest extends TestCase
             'duplicate_id' => $m[1]
         ]);
     }
+
+    public function testDeletingTrackRemovesFromOlaf(): void
+    {
+        $track = Track::factory()->uploaded()->create();
+
+        $this->assertEquals(1, Olaf::stats()->numberOfSongs);
+
+        $track->delete();
+
+        $this->assertEquals(0, Olaf::stats()->numberOfSongs);
+    }
 }

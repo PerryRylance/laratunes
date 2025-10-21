@@ -46,4 +46,10 @@ class TrackObserver
         foreach($tracks as $original)
             $original->duplicates()->attach($track);
     }
+
+    public function deleting(Track $track): void
+    {
+        Olaf::delete($track->path);
+        Storage::disk('media')->delete($track->path);
+    }
 }

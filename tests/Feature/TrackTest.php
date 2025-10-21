@@ -7,6 +7,10 @@ use App\Filament\Resources\Tracks\Pages\ListTracks;
 use App\Models\Track;
 use App\Models\User;
 use App\Facades\Olaf;
+use App\Filament\Resources\Tracks\Pages\EditTrack;
+use App\Filament\Resources\Tracks\Pages\ViewTrack;
+use DateTime;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
@@ -196,22 +200,73 @@ class TrackTest extends TestCase
 
     public function testView(): void
     {
+        $track = Track::factory()->uploaded()->create();
 
+        Livewire::test(ViewTrack::class, [
+            'record' => $track->id,
+        ])
+            ->assertOk()
+            ->assertSchemaStateSet([
+                'title' => $track->title,
+                'artist' => $track->artist,
+                'plays' => $track->plays,
+                'last_played_at' => $track->last_played_at?->format('Y-m-d H:i:s'),
+                'created_at' => $track->created_at->format('Y-m-d\TH:i:s.u\Z'),
+                'updated_at' => $track->updated_at->format('Y-m-d\TH:i:s.u\Z')
+            ]);
     }
 
     public function testUpdateMetadata(): void
     {
+        $track = Track::factory()->uploaded()->create();
+        $data = Track::factory()->make()->only(['title', 'artist']);
 
+        Livewire::test(EditTrack::class, [
+            'record' => $track->id,
+        ])
+            ->fillForm($data)
+            ->call('save')
+            ->assertNotified();
+
+        $this->assertDatabaseHas(Track::class, [
+            'id' => $track->id,
+            ...$data
+        ]);
     }
 
     public function testCannotUpdateFixedFields(): void
     {
+        $track = Track::factory()->uploaded()->create();
+        $hash = md5( time() );
 
+        Livewire::test(EditTrack::class, [
+            'record' => $track->id,
+        ])
+            ->fillForm([
+                'hash' => $hash
+            ])
+            ->call('save')
+            ->assertNotified();
+
+        $this->assertDatabaseMissing(Track::class, [
+            'id' => $track->id,
+            'hash' => $hash
+        ]);
     }
 
     public function testDelete(): void
     {
+        $track = Track::factory()->uploaded()->create();
 
+        Livewire::test(EditTrack::class, [
+            'record' => $track->id,
+        ])
+            ->callAction(DeleteAction::class)
+            ->assertNotified()
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing($track);
+        $this->assertFalse(Storage::disk('media')->exists($track->path));
     }
 
     public function testBulkDelete(): void
@@ -225,20 +280,13 @@ class TrackTest extends TestCase
             ->assertNotified()
             ->assertCanNotSeeTableRecords($tracks);
 
-        $tracks->each(fn (Track $track) => $this->assertDatabaseMissing($track));
-    }
-
-    public function testDeleteRemovesFile(): void
-    {
-
+        $tracks->each(function(Track $track) {
+            $this->assertDatabaseMissing($track);
+            $this->assertFalse(Storage::disk('media')->exists($track->path));
+        });
     }
 
     public function testDeleteRemovesVotes(): void
-    {
-
-    }
-
-    public function testDeleteRemoveFromOlaf(): void
     {
 
     }

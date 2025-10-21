@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Tracks\Schemas;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Operation;
 
 class TrackForm
 {
@@ -20,7 +21,12 @@ class TrackForm
                         'audio/flac'
                     ])
                     ->preserveFilenames()
-                    ->required()
+                    ->hiddenOn([Operation::View, Operation::Edit])
+                    ->required(),
+                TextInput::make('title')
+                    ->hiddenOn(Operation::Create),
+                TextInput::make('artist')
+                    ->hiddenOn(Operation::Create),
             ]);
     }
 }
