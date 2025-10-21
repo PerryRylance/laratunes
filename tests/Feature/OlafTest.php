@@ -8,10 +8,19 @@ use App\Models\TrackHasDuplicates;
 use App\Facades\Olaf;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
-use Tests\OlafTestCase;
+use Tests\TestCase;
+use Tests\Attributes\UsesRealOlaf;
+use Tests\Attributes\UsesRealStorage;
 
-class OlafTest extends OlafTestCase
+#[UsesRealOlaf]
+#[UsesRealStorage]
+class OlafTest extends TestCase
 {
+    protected function afterRefreshingDatabase()
+    {
+        Olaf::reset();
+    }
+
     public function testReset(): void
     {
         Olaf::store('8-bit-takeover-367276.mp3');

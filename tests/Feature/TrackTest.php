@@ -20,9 +20,6 @@ class TrackTest extends TestCase
     {
         parent::setUp();
 
-        Olaf::fake();
-        Storage::fake('media');
-
         $this->actingAs(User::factory()->create());
     }
 
