@@ -25,6 +25,12 @@ class Track extends Model
     /** @use HasFactory<\Database\Factories\TrackFactory> */
     use HasFactory;
 
+	const SUPPORTED_EXTENSIONS = [
+		'mp3',
+		'ogg',
+		'flac'
+	];
+
 	protected $attributes = [
 		'plays' => 0
 	];
@@ -38,8 +44,10 @@ class Track extends Model
 		'last_played_at'
 	];
 
-	public static function createFromFile(string $path): Track
+	public static function createFromFile(string $relative): Track
 	{
+		$path = Storage::disk('media')->path($relative);
+
 		if(!file_exists($path))
 			throw new InvalidArgumentException("File does not exist '$path'");
 
@@ -51,7 +59,7 @@ class Track extends Model
 		$audio = Audio::read($path);
 
 		$track = Track::create([
-			'path' => $path,
+			'path' => $relative,
 			'hash' => $hash,
 			'artist' => $audio->getArtist(),
 			'title' => $audio->getTitle()
@@ -79,6 +87,11 @@ class Track extends Model
 	public function duplicates(): BelongsToMany
 	{
 		return $this->belongsToMany(Track::class, 'track_has_duplicates', 'original_id', 'duplicate_id');
+	}
+
+	public function originals(): BelongsToMany
+	{
+		return $this->belongsToMany(Track::class, 'track_has_duplicates', 'duplicate_id', 'original_id');
 	}
 
 	public function scopeMostRecentlyPlayed(Builder $query)

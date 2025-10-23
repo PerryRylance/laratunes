@@ -126,7 +126,7 @@ class TrackTest extends TestCase
             'hash' => md5("")
         ]);
     }
-
+    
     private function testCreateReadsMetadata(string $source, array $expected): void
     {
         $content = file_get_contents($source);
@@ -197,6 +197,11 @@ class TrackTest extends TestCase
         $this->assertDatabaseMissing(Track::class, [
             'path' => $filename
         ]);
+    }
+
+    public function testCreateFailsWithNonUniqueHash(): void
+    {
+
     }
 
     public function testView(): void

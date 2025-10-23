@@ -11,6 +11,7 @@ use Livewire\Livewire;
 use Tests\TestCase;
 use Tests\Attributes\UsesRealOlaf;
 use Tests\Attributes\UsesRealStorage;
+use Tests\TestFiles;
 
 #[UsesRealOlaf]
 #[UsesRealStorage]
@@ -23,7 +24,7 @@ class OlafTest extends TestCase
 
     public function testReset(): void
     {
-        Olaf::store('8-bit-takeover-367276.mp3');
+        Olaf::store( TestFiles::all()->first() );
         Olaf::reset();
 
         $this->assertFileDoesNotExist('./.olaf/docker_dbs/db/data.mdb');
@@ -33,7 +34,7 @@ class OlafTest extends TestCase
     public function testStats(): void
     {
         // NB: Store one file first otherwise it'll error because the Olaf DB doesn't exist
-        Olaf::store('8-bit-takeover-367276.mp3');
+        Olaf::store( TestFiles::all()->first() );
 
         $stats = Olaf::stats();
 
@@ -45,18 +46,21 @@ class OlafTest extends TestCase
     {
         $this->assertEquals(0, Olaf::stats()->numberOfSongs);
 
-        Olaf::store('8-bit-takeover-367276.mp3');
+        Olaf::store( TestFiles::all()->first() );
 
         $this->assertEquals(1, Olaf::stats()->numberOfSongs);
     }
 
     public function testQuery(): void
     {
-        $expected = 'chiptune-techno-electro-bubblegum-bass-bass-music-hiphop-1-334458.mp3';
+        $files = TestFiles::all();
+        $expected = $files->take(1);
+        $others = $files->slice(1);
 
-        Olaf::store('8-bit-takeover-367276.mp3');
         Olaf::store($expected);
-        Olaf::store('pixelate-pixelated-dreams-313358.mp3');
+
+        foreach($others as $other)
+            Olaf::store($other);
 
         copy("./tests/Fixtures/media/$expected", './tests/Fixtures/media/query.mp3');
 
@@ -72,18 +76,22 @@ class OlafTest extends TestCase
 
     public function testQueryDoesNotYieldFalsePositives(): void
     {
-        Olaf::store('8-bit-takeover-367276.mp3');
-        Olaf::store('pixelate-pixelated-dreams-313358.mp3');
+        $files = TestFiles::all();
+        $unexpected = $files->take(1);
+        $others = $files->slice(1);
 
-        $results = Olaf::query('chiptune-techno-electro-bubblegum-bass-bass-music-hiphop-1-334458.mp3');
+        foreach($others as $other)
+            Olaf::store($other);
+
+        $results = Olaf::query($unexpected);
 
         $this->assertCount(0, $results->items);
     }
 
     public function testDelete(): void
     {
-        Olaf::store('8-bit-takeover-367276.mp3');
-        Olaf::delete('8-bit-takeover-367276.mp3');
+        Olaf::store( TestFiles::all()->first() );
+        Olaf::delete( TestFiles::all()->first() );
 
         $this->assertEquals(0, Olaf::stats()->numberOfSongs);
     }
@@ -92,7 +100,7 @@ class OlafTest extends TestCase
     {
         $this->beforeApplicationDestroyed(fn() => unlink('./tests/Fixtures/media/duplicate.mp3'));
 
-        $source = '8-bit-takeover-367276.mp3';
+        $source = TestFiles::all()->first();
 
         $original = Track::factory()->create([
             'path' => $source
@@ -115,10 +123,19 @@ class OlafTest extends TestCase
         if(!preg_match('/tracks\/(\d+)$/', $url, $m))
             $this->fail('Failed to get ID from redirect URL');
 
+        $redirectId = (int)$m[1];
+
+        // NB: Check the duplicaet is in the database
         $this->assertDatabaseHas(TrackHasDuplicates::class, [
             'original_id' => $original->id,
-            'duplicate_id' => $m[1]
+            'duplicate_id' => $redirectId
         ]);
+
+        // NB: Check the mutual relationships
+        $track = Track::findOrFail($redirectId);
+
+        $this->assertEquals($track->id, $original->duplicates->first()->id);
+        $this->assertEquals($track->originals->first()->id, $original->id);
     }
 
     public function testDeletingTrackRemovesFromOlaf(): void

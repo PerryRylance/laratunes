@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Exceptions\TransmissionException;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use App\Facades\Buffer;
@@ -32,7 +33,13 @@ class StartBroadcast extends Command
 
         Buffer::init();
 
-        Transmission::begin();
+        try{
+            Transmission::begin();
+        }catch(TransmissionException $e) {
+            $this->fail($e->getMessage());
+            return;
+        }
+
         Buffer::loop();
 
         // TODO: Trap sigterm? Differentiate between OS requested shutdown and processes ended unexpectedly?

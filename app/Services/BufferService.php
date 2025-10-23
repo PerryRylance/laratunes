@@ -14,6 +14,7 @@ use chillerlan\QRCode\QROptions;
 use Fiber;
 
 use Illuminate\Support\Facades\Storage;
+use Laravel\Prompts\Output\ConsoleOutput;
 
 class BufferService
 {
@@ -73,6 +74,7 @@ class BufferService
         $track = Track::next();
 
         Log::info("Playing {$track->path}");
+        echo "Now playing {$track->path}" . PHP_EOL;
 
         static::writeCaptionFile($track);
         static::writeQrCode($track);
@@ -122,6 +124,8 @@ class BufferService
         $result = $process->wait();
         
         if($result->failed())
-            throw new BufferException("Failed to buffer $file ({$result->exitCode()})");
+        {
+            throw new BufferException($process, "Failed to buffer $file ({$result->exitCode()})");
+        }
     }
 }

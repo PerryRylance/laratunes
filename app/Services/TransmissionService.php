@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Exceptions\TransmissionException;
 use App\Facades\Ffmpeg;
 use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -98,6 +100,6 @@ class TransmissionService
 		usleep(500_000);
 
 		if(!$process->running())
-			throw new Exception("Process stopped running unexpectedly");
+			throw new TransmissionException($process, 'Transmission did not start correctly (Exit code {$process->exitCode()})');
     }
 }

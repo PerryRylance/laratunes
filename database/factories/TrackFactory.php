@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Storage;
+use Tests\TestFiles;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Track>
@@ -36,11 +37,7 @@ class TrackFactory extends Factory
     public function uploaded(?string $filename = null): Factory
     {
         if($filename === null)
-            $src = fake()->randomElement([
-                '8-bit-takeover-367276.mp3',
-                'chiptune-techno-electro-bubblegum-bass-bass-music-hiphop-1-334458.mp3',
-                'pixelate-pixelated-dreams-313358.mp3'
-            ]);
+            $src = fake()->randomElement(TestFiles::all());
         else
             $src = $filename;
         
