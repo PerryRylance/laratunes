@@ -29,5 +29,9 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTBOT_API_TOKEN" value="test-nightbot-api-token-do-not-use"/>
+        <env name="BROADCAST_VIDEO_WIDTH" value="1280"/>
+        <env name="BROADCAST_VIDEO_HEIGHT" value="720"/>
+        <env name="BROADCAST_URL" value="rtmp://rtmp-sink/live/test"/>
+        <env name="BROADCAST_BACKGROUND" value="loop.mp4"/>
     </php>
 </phpunit>

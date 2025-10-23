@@ -2,48 +2,41 @@
 
 namespace Tests\Feature;
 
+use App\Facades\Fifo;
+use App\Models\Track;
 use Illuminate\Process\InvokedProcess;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Tests\TestCase;
+use Fiber;
+use Illuminate\Support\Facades\Storage;
 
 class BroadcastTest extends TestCase
 {
-    private ?InvokedProcess $process = null;
-
-    private function startBroadcast(): void
+    protected function setUp(): void
     {
-        $this->process = Process::start('php artisan app:broadcast');
+        parent::setUp();
 
-        usleep(500_000);
+        Storage::disk('media')->put('loop.mp4', file_get_contents('./tests/Fixtures/media/loop.mp4'));
+        Track::factory()->uploaded()->create();
 
-        if(!$this->process->running())
-        {
-            $message = trim( $this->process->output() );
+        $fiber = new Fiber(function() {
+            Artisan::call('app:start-broadcast');
+        });
 
-            $this->fail("Failed to start broadcast ($message)");
-        }
-    }
+        $fiber->start();
 
-    protected function tearDown(): void
-    {
-        if($this->process)
-        {
-            $this->process->stop(1, SIGTERM);
-
-            if($this->process->running())
-            {
-                $this->fail('Failed to stop broadcast, halting test suite');
-                exit(1);
-            }
-        }
-
-        parent::tearDown();
+        sleep(1);
     }
 
     public function testNowPlayingBufferCreated(): void
     {
-        $this->startBroadcast();
         $this->assertFileExists('/buffers/now-playing');
+    }
+
+    public function testBufferHasData(): void
+    {
+        $this->assertGreaterThan(0, Fifo::usage());
     }
 }

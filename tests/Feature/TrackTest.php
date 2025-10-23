@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Facades\Olaf;
 use App\Filament\Resources\Tracks\Pages\EditTrack;
 use App\Filament\Resources\Tracks\Pages\ViewTrack;
+use Carbon\Carbon;
 use DateTime;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -289,5 +290,30 @@ class TrackTest extends TestCase
     public function testDeleteRemovesVotes(): void
     {
 
+    }
+
+    public function testNextIncrementsPlayCount(): void
+    {
+        $track = Track::factory()->uploaded()->unplayed()->create();
+        $actual = Track::next();
+
+        $this->assertTrue($actual->is($track));
+
+        $track->refresh();
+
+        $this->assertEquals(1, $track->plays);
+    }
+
+    public function testNextSetsLastPlayedAt(): void
+    {
+        $track = Track::factory()->uploaded()->unplayed()->create();
+        $actual = Track::next();
+        $now = Carbon::now();
+
+        $this->assertTrue($actual->is($track));
+
+        $track->refresh();
+
+        $this->assertLessThanOrEqual(1, $now->diffInSeconds($track->last_played_at, true));
     }
 }

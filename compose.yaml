@@ -56,6 +56,14 @@ services:
                 - ping
             retries: 3
             timeout: 5s
+    rtmp-sink:
+        image: tiangolo/nginx-rtmp
+        container_name: rtmp-sink
+        ports:
+            - "1935:1935"
+        restart: unless-stopped
+        networks:
+            - sail
 networks:
     sail:
         driver: bridge

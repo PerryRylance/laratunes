@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Facades\Olaf;
 use App\Observers\TrackObserver;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
@@ -10,10 +11,13 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use Kiwilan\Audio\Audio;
+use Throwable;
 
 #[ObservedBy([TrackObserver::class])]
 class Track extends Model
@@ -51,6 +55,17 @@ class Track extends Model
 			'hash' => $hash,
 			'artist' => $audio->getArtist(),
 			'title' => $audio->getTitle()
+		]);
+
+		return $track;
+	}
+
+	public static function next(): Track
+	{
+		$track = Track::orderBy('plays')->inRandomOrder()->firstOrFail();
+
+		$track->increment('plays', 1, [
+			'last_played_at' => Carbon::now()
 		]);
 
 		return $track;

@@ -52,4 +52,12 @@ class TrackFactory extends Factory
             'path' => $dst
         ]);
     }
+
+    public function unplayed(): Factory
+    {
+        return $this->state(fn (array $attributes) => [
+            'plays' => 0,
+            'last_played_at' => null
+        ]);
+    }
 }

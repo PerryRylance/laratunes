@@ -69,14 +69,16 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY php.ini /etc/php/8.4/cli/conf.d/99-sail.ini
 RUN chmod +x /usr/local/bin/start-container
 
+# Laratunes FIFO buffers
 COPY ext/set_fifo_size.c /tmp/set_fifo_size.c
 RUN gcc -O2 -o /usr/local/bin/set_fifo_size /tmp/set_fifo_size.c
 
 COPY ext/get_fifo_bytes_available.c /tmp/get_fifo_bytes_available.c
 RUN gcc -O2 -o /usr/local/bin/get_fifo_bytes_available /tmp/get_fifo_bytes_available.c
 
-RUN mkdir -p /buffers
+RUN mkdir -p /buffers && chmod 777 /buffers
 
+# Start the container
 EXPOSE 80/tcp
 
 ENTRYPOINT ["start-container"]
