@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Integration;
 
 use App\Filament\Resources\Tracks\Pages\CreateTrack;
 use App\Models\Track;

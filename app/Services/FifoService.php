@@ -21,12 +21,6 @@ class FifoService
 
             throw new \Exception($message);
         }
-        
-        // NB: Hangs
-        // static::$keepOpenHandle = fopen($file, 'w');
-
-        // if(static::$keepOpenHandle === false)
-        //     throw new BufferException('Failed to create keep-open');
 
         $result = Process::run("set_fifo_size");
         $output = $result->output();
