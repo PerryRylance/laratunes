@@ -19,7 +19,7 @@ class FifoService
             $output = trim($result->errorOutput());
             $message = "Failed to create now playing buffer ($output)";
 
-            throw new BufferException($message);
+            throw new \Exception($message);
         }
         
         // NB: Hangs
@@ -32,10 +32,10 @@ class FifoService
         $output = $result->output();
 
         if($result->failed())
-            throw new BufferException("Failed to set FIFO size: {$output} ({$result->exitCode()})");
+            throw new \Exception("Failed to set FIFO size: {$output} ({$result->exitCode()})");
 
         if(!preg_match('/FIFO buffer size successfully set to (\d+) bytes/', $output, $m))
-            throw new BufferException("Failed to match created FIFO size in $output");
+            throw new \Exception("Failed to match created FIFO size in $output");
 
         static::$capacity = (int)$m[1];
     }

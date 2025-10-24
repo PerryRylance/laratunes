@@ -12,17 +12,15 @@ class FfmpegService
     public static function start(string $name, array $params): InvokedProcess
     {
         return Process::timeout(false)->start(['ffmpeg', ...$params], function (string $type, string $output) use ($name) {
-            try{
-                Log::info("[$name].std$type: $output");
-            }catch(BindingResolutionException $e) {
-                if($e->getMessage() === 'Target class [config] does not exist.')
-                {
-                    // trigger_error("Caught BindingResolutionException from Log, process did not terminate cleanly", E_USER_WARNING);
-                    return;
-                }
 
-                throw $e;
-            }
+            // if(preg_match('/bitrate=\s*(\d+\(.\d+)?)kbits\/s/', $output, $m))
+
+
+            Log::info("[$name].std$type: $output");
+
+
         });
     }
+
+    // private static function report(string $name, string $)
 }

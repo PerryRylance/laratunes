@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use App\Facades\Buffer;
 use App\Facades\Transmission;
+use Illuminate\Support\Facades\Concurrency;
 
 class StartBroadcast extends Command
 {
@@ -31,16 +32,21 @@ class StartBroadcast extends Command
     {
         Log::info("Starting broadcast");
 
-        Buffer::init();
+        Concurrency::driver('fork')->run([
+            fn() => Buffer::loop(),
+            fn() => Transmission::begin()
+        ]);
 
-        try{
+        // Buffer::init();
+
+        /*try{
             Transmission::begin();
         }catch(TransmissionException $e) {
             $this->fail($e->getMessage());
             return;
         }
 
-        Buffer::loop();
+        Buffer::loop();*/
 
         // TODO: Trap sigterm? Differentiate between OS requested shutdown and processes ended unexpectedly?
     }

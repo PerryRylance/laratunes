@@ -24,7 +24,7 @@ class BufferService
     const NOW_PLAYING_QR_CODE_PATH = '/tmp/now-playing-qr-code.png';
     const NOW_PLAYING_CAPTION_PATH = '/tmp/now-playing.txt';
 
-    public static function init(): void
+    public static function loop(): void
     {
         try{
             Log::info("Creating FIFO buffer");
@@ -33,10 +33,7 @@ class BufferService
             Log::error($e->getMessage());
             exit(1);
         }
-    }
 
-    public static function loop(): void
-    {
         while(true)
             static::bufferNextTrack();
     }
@@ -118,14 +115,13 @@ class BufferService
             static::NOW_PLAYING_BUFFER_PATH,
         ]);
 
+        // TODO: I don't know if this will work any more now that we're forking
         if(app()->runningUnitTests())
             Fiber::suspend();
 
         $result = $process->wait();
         
         if($result->failed())
-        {
             throw new BufferException($process, "Failed to buffer $file ({$result->exitCode()})");
-        }
     }
 }

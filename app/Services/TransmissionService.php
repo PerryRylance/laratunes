@@ -96,10 +96,9 @@ class TransmissionService
 			'screenshot.jpg'
 		]);
 
-		// NB: Give it a second to start
-		usleep(500_000);
+		while($process->running())
+			usleep(500_000);
 
-		if(!$process->running())
-			throw new TransmissionException($process, 'Transmission did not start correctly (Exit code {$process->exitCode()})');
+		throw new TransmissionException($process, 'Transmission stopped unexpectedly (Exit code {$process->exitCode()})');
     }
 }
