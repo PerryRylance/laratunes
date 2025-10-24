@@ -15,6 +15,7 @@ use Fiber;
 
 use Illuminate\Support\Facades\Storage;
 use Laravel\Prompts\Output\ConsoleOutput;
+use Throwable;
 
 class BufferService
 {
@@ -27,15 +28,19 @@ class BufferService
     public static function loop(): void
     {
         try{
+
             Log::info("Creating FIFO buffer");
             Fifo::create(static::NOW_PLAYING_BUFFER_PATH);
-        }catch(BufferException $e) {
-            Log::error($e->getMessage());
-            exit(1);
-        }
 
-        while(true)
-            static::bufferNextTrack();
+            while(true)
+                static::bufferNextTrack();
+
+        }catch(Throwable $e) {
+
+            Log::error("Error buffering: " . $e->getMessage());
+            exit(1);
+
+        }
     }
 
     private static function writeCaptionFile(Track $track): void
@@ -71,7 +76,6 @@ class BufferService
         $track = Track::next();
 
         Log::info("Playing {$track->path}");
-        echo "Now playing {$track->path}" . PHP_EOL;
 
         static::writeCaptionFile($track);
         static::writeQrCode($track);
@@ -114,10 +118,6 @@ class BufferService
 
             static::NOW_PLAYING_BUFFER_PATH,
         ]);
-
-        // TODO: I don't know if this will work any more now that we're forking
-        if(app()->runningUnitTests())
-            Fiber::suspend();
 
         $result = $process->wait();
         

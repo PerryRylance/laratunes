@@ -8,17 +8,32 @@ use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class TransmissionService
 {
     public static function begin(): void
     {
-		Log::info("Beginning transmission");
+		try{
 
-		if(empty(config('broadcast.url')))
-            throw new Exception('Broadcast URL not configured');
+			Log::info("Beginning transmission");
 
-        [
+			if(empty(config('broadcast.url')))
+				throw new Exception('Broadcast URL not configured');
+
+			static::work();
+
+		}catch(Throwable $e) {
+
+			Log::error("Error transmitting: " . $e->getMessage());
+            exit(1);
+
+		}
+    }
+
+	private static function work(): void
+	{
+		[
             'video_width' => $width,
             'video_height' => $height,
             'url' => $url,
@@ -100,5 +115,5 @@ class TransmissionService
 			usleep(500_000);
 
 		throw new TransmissionException($process, 'Transmission stopped unexpectedly (Exit code {$process->exitCode()})');
-    }
+	}
 }

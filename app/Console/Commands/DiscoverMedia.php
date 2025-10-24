@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Facades\Olaf;
 use App\Models\Track;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
@@ -14,7 +15,8 @@ class DiscoverMedia extends Command
      *
      * @var string
      */
-    protected $signature = 'app:discover-media';
+    protected $signature = 'app:discover-media
+        {--fake-olaf : Fake the Olaf facade for testing purposes}';
 
     /**
      * The console command description.
@@ -29,6 +31,9 @@ class DiscoverMedia extends Command
     public function handle()
     {
         // TODO: Might be quicker to insert without Olaf then use Olaf's dedupe command rather than letting it query individually
+
+        if($this->option('fake-olaf'))
+            Olaf::fake();
 
         $files = (new Collection(Storage::disk('media')->allFiles()))
             ->filter(fn (string $file) => in_array( 

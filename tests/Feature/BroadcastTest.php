@@ -11,23 +11,32 @@ use Illuminate\Support\Facades\Process;
 use Tests\TestCase;
 use Fiber;
 use Illuminate\Support\Facades\Storage;
+use Tests\Attributes\UsesRealStorage;
 
+#[UsesRealStorage]
 class BroadcastTest extends TestCase
 {
+    private InvokedProcess $process;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        Storage::disk('media')->put('loop.mp4', file_get_contents('./tests/Fixtures/media/loop.mp4'));
-        Track::factory()->uploaded()->create();
+        // NB: Because the tests run in a transaction, factories won't work here. So make sure there's some tracks to broadcast with.
+        Process::run("php artisan app:reset-media");
+        Process::run("php artisan app:discover-media --fake-olaf");
 
-        $fiber = new Fiber(function() {
-            Artisan::call('app:start-broadcast');
-        });
+        $this->process = Process::start('php artisan app:start-broadcast', fn(string $type, string $output) => print("$type: $output" . PHP_EOL));
 
-        $fiber->start();
+        // NB: Give it a second to get the buffer going
+        sleep(5);
+    }
 
-        sleep(1);
+    protected function tearDown(): void
+    {
+        $this->process->stop();
+
+        parent::tearDown();
     }
 
     public function testNowPlayingBufferCreated(): void

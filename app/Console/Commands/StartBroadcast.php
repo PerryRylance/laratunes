@@ -37,16 +37,7 @@ class StartBroadcast extends Command
             fn() => Transmission::begin()
         ]);
 
-        // Buffer::init();
-
-        /*try{
-            Transmission::begin();
-        }catch(TransmissionException $e) {
-            $this->fail($e->getMessage());
-            return;
-        }
-
-        Buffer::loop();*/
+        $this->fail('Broadcast stopped unexpectedly');
 
         // TODO: Trap sigterm? Differentiate between OS requested shutdown and processes ended unexpectedly?
     }
