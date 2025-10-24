@@ -6,6 +6,7 @@
         "dev": "vite"
     },
     "dependencies": {
+        "@prettier/plugin-php": "^0.24.0",
         "@tailwindcss/vite": "^4.1.11",
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.4",
@@ -18,5 +19,11 @@
         "@rollup/rollup-linux-x64-gnu": "4.9.5",
         "@tailwindcss/oxide-linux-x64-gnu": "^4.0.1",
         "lightningcss-linux-x64-gnu": "^1.29.1"
+    },
+    "devDependencies": {
+        "@stedi/prettier-plugin-jsonata": "^2.1.6",
+        "esprima": "^4.0.1",
+        "prettier": "^3.6.2",
+        "stillat-blade-parser": "^2.0.1"
     }
 }
