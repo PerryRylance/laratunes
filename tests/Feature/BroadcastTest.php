@@ -34,7 +34,7 @@ class BroadcastTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->process->stop();
+        $this->process->stop(10, SIGKILL);
 
         parent::tearDown();
     }

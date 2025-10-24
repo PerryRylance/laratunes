@@ -24,3 +24,5 @@ yarn-error.log
 /.olaf
 /tests/Fixtures/media/duplicate.mp3
 *:Zone.Identifier
+/tests.output
+/screenshot.jpg

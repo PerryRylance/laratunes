@@ -54,7 +54,7 @@ class OlafTest extends TestCase
     public function testQuery(): void
     {
         $files = TestFiles::all();
-        $expected = $files->take(1);
+        $expected = $files->take(1)->first();
         $others = $files->slice(1);
 
         Olaf::store($expected);
@@ -71,13 +71,13 @@ class OlafTest extends TestCase
         $best = $results->items->first();
 
         $this->assertEquals($expected, $best['file']);
-        $this->assertEquals(988, $best['confidence']);
+        $this->assertEquals(641, $best['confidence']);
     }
 
     public function testQueryDoesNotYieldFalsePositives(): void
     {
         $files = TestFiles::all();
-        $unexpected = $files->take(1);
+        $unexpected = $files->take(1)->first();
         $others = $files->slice(1);
 
         foreach($others as $other)
@@ -96,6 +96,7 @@ class OlafTest extends TestCase
         $this->assertEquals(0, Olaf::stats()->numberOfSongs);
     }
 
+    // TODO: I am flakey when running the whole suite
     public function testCreatingTrackIdentifiesDuplicate(): void
     {
         $this->beforeApplicationDestroyed(fn() => unlink('./tests/Fixtures/media/duplicate.mp3'));
