@@ -227,6 +227,8 @@ class TrackTest extends TestCase
         $track = Track::findOrFail((int)$m[1]);
 
         $this->assertNotEquals($existing->path, $track->path);
+        $this->assertEquals("{$existing->path} (1)", $track->path);
+
         $this->assertTrue(Storage::disk('media')->exists($track->path));
     }
 
