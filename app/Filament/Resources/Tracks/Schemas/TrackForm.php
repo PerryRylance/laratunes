@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Tracks\Schemas;
 
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Operation;
 
@@ -27,6 +29,11 @@ class TrackForm
                     ->hiddenOn(Operation::Create),
                 TextInput::make('artist')
                     ->hiddenOn(Operation::Create),
+                TextEntry::make('path')
+                    ->label('Path')
+                    ->hiddenOn([Operation::Edit]),
+                ViewField::make('audio')
+                    ->view('filament.forms.fields.audio-player')
             ]);
     }
 }

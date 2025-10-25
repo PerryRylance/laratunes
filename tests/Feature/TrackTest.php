@@ -216,6 +216,7 @@ class TrackTest extends TestCase
                 'title' => $track->title,
                 'artist' => $track->artist,
                 'plays' => $track->plays,
+                'path' => $track->path,
                 'last_played_at' => $track->last_played_at?->format('Y-m-d H:i:s'),
                 'created_at' => $track->created_at->format('Y-m-d\TH:i:s.u\Z'),
                 'updated_at' => $track->updated_at->format('Y-m-d\TH:i:s.u\Z')
@@ -320,5 +321,37 @@ class TrackTest extends TestCase
         $track->refresh();
 
         $this->assertLessThanOrEqual(1, $now->diffInSeconds($track->last_played_at, true));
+    }
+
+    public function testCanViewPath(): void
+    {
+
+    }
+
+    public function testCanGetAudioBinary(): void
+    {
+        $track = Track::factory()->uploaded()->create();
+        $binary = Storage::disk('media')->get($track->path);
+
+        $this
+            ->get("/api/audio/{$track->hash}")
+            ->assertSuccessful()
+            ->assertHeader('Content-type', 'audio/mpeg')
+            ->assertContent($binary);
+    }
+
+    public function testGetAudioBinaryRespectsRequestedRange(): void
+    {
+        
+    }
+
+    public function testUnauthorizedUsersCannotGetAudioBinary(): void
+    {
+
+    }
+
+    public function testViewHasAudioPlayer(): void
+    {
+
     }
 }
