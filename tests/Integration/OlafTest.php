@@ -7,6 +7,7 @@ use App\Models\Track;
 use App\Models\TrackHasDuplicates;
 use App\Facades\Olaf;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 use Tests\Attributes\UsesRealOlaf;
@@ -14,7 +15,6 @@ use Tests\Attributes\UsesRealStorage;
 use Tests\TestFiles;
 
 #[UsesRealOlaf]
-#[UsesRealStorage]
 class OlafTest extends TestCase
 {
     protected function afterRefreshingDatabase()
@@ -24,7 +24,10 @@ class OlafTest extends TestCase
 
     public function testReset(): void
     {
-        Olaf::store( TestFiles::all()->first() );
+        $file = TestFiles::all()->first();
+
+        TestFiles::store($file);
+        Olaf::store($file);
         Olaf::reset();
 
         $this->assertFileDoesNotExist('./.olaf/docker_dbs/db/data.mdb');
@@ -34,7 +37,10 @@ class OlafTest extends TestCase
     public function testStats(): void
     {
         // NB: Store one file first otherwise it'll error because the Olaf DB doesn't exist
-        Olaf::store( TestFiles::all()->first() );
+        $file = TestFiles::all()->first();
+
+        TestFiles::store($file);
+        Olaf::store($file);
 
         $stats = Olaf::stats();
 
@@ -46,7 +52,10 @@ class OlafTest extends TestCase
     {
         $this->assertEquals(0, Olaf::stats()->numberOfSongs);
 
-        Olaf::store( TestFiles::all()->first() );
+        $file = TestFiles::all()->first();
+
+        TestFiles::store($file);
+        Olaf::store($file);
 
         $this->assertEquals(1, Olaf::stats()->numberOfSongs);
     }
@@ -57,16 +66,18 @@ class OlafTest extends TestCase
         $expected = $files->take(1)->first();
         $others = $files->slice(1);
 
+        TestFiles::store($expected);
         Olaf::store($expected);
 
         foreach($others as $other)
+        {
+            TestFiles::store($other);
             Olaf::store($other);
+        }
 
-        copy("./tests/Fixtures/media/$expected", './tests/Fixtures/media/query.mp3');
+        Storage::disk('media')->put('query.mp3', file_get_contents("./tests/Fixtures/media/$expected"));
 
         $results = Olaf::query('query.mp3');
-
-        unlink('./tests/Fixtures/media/query.mp3');
 
         $best = $results->items->first();
 
@@ -80,8 +91,13 @@ class OlafTest extends TestCase
         $unexpected = $files->take(1)->first();
         $others = $files->slice(1);
 
+        TestFiles::store($unexpected);
+
         foreach($others as $other)
+        {
+            TestFiles::store($other);
             Olaf::store($other);
+        }
 
         $results = Olaf::query($unexpected);
 
@@ -90,8 +106,12 @@ class OlafTest extends TestCase
 
     public function testDelete(): void
     {
-        Olaf::store( TestFiles::all()->first() );
-        Olaf::delete( TestFiles::all()->first() );
+        $file = TestFiles::all()->first();
+
+        TestFiles::store($file);
+        Olaf::store($file);
+
+        Olaf::delete($file);
 
         $this->assertEquals(0, Olaf::stats()->numberOfSongs);
     }
@@ -99,21 +119,14 @@ class OlafTest extends TestCase
     // TODO: I am flakey when running the whole suite
     public function testCreatingTrackIdentifiesDuplicate(): void
     {
-        $this->beforeApplicationDestroyed(fn() => unlink('./tests/Fixtures/media/duplicate.mp3'));
-
         $source = TestFiles::all()->first();
-
-        $original = Track::factory()->create([
-            'path' => $source
-        ]);
-
         $content = file_get_contents("./tests/Fixtures/media/$source");
-
-        $file = UploadedFile::fake()->createWithContent('duplicate.mp3', $content);
+        $original = Track::factory()->uploaded($source)->create();
+        $upload = UploadedFile::fake()->createWithContent('duplicate.mp3', $content);
 
         $response = Livewire::test(CreateTrack::class)
             ->fillForm([
-                'attachment' => $file
+                'attachment' => $upload
             ])
             ->call('create')
             ->assertNotified()

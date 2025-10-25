@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 final class TestFiles
 {
@@ -13,5 +14,10 @@ final class TestFiles
 			'chiptune-techno-electro-bubblegum-bass-bass-music-hiphop-1-334458.mp3',
             'pixelate-pixelated-dreams-313358.mp3'
         ]);
+    }
+
+    public static function store(string $filename)
+    {
+        return Storage::disk('media')->put($filename, file_get_contents("./tests/Fixtures/media/$filename"));
     }
 }

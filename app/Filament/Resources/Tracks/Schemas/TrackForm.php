@@ -71,12 +71,16 @@ class TrackForm
                     ->view('filament.forms.fields.audio-player')
                     ->hiddenOn([Operation::Create]),
                 ViewField::make('duplicates')
-                    ->view('filament.forms.fields.track-duplicates')
-                    ->when($hasDuplicates)
+                    ->view('filament.forms.fields.track-duplicates', [
+                        'relation' => 'duplicates'
+                    ])
+                    ->visible($hasDuplicates)
                     ->hiddenOn([Operation::Create]),
                 ViewField::make('originals')
-                    ->view('filament.forms.fields.track-duplicates')
-                    ->when($hasOriginals)
+                    ->view('filament.forms.fields.track-duplicates', [
+                        'relation' => 'originals'
+                    ])
+                    ->visible($hasOriginals)
                     ->hiddenOn([Operation::Create]),
             ]);
     }

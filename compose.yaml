@@ -19,7 +19,7 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
-            - './tests/Fixtures/media:/mnt/media'
+            - './storage/framework/testing/disks/media:/mnt/media'
         networks:
             - sail
         depends_on:
@@ -40,7 +40,7 @@ services:
         volumes:
             - './.olaf/docker_dbs:/root/.olaf'
             - './docker/olaf/scripts:/var/www/html'
-            - './tests/Fixtures/media:/root/audio'
+            - './storage/framework/testing/disks/media:/root/audio'
     redis:
         image: 'redis:alpine'
         ports:

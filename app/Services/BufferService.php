@@ -45,18 +45,7 @@ class BufferService
 
     private static function writeCaptionFile(Track $track): void
     {
-        $artist = "Unknown Artist";
-        $title = "Unknown Title";
-
-        if(!empty($track->artist))
-            $artist = $track->artist;
-
-        if(!empty($track->artist))
-            $artist = $track->artist;
-
-        $caption = "$artist - $title";
-
-        file_put_contents(static::NOW_PLAYING_CAPTION_PATH, $caption);
+        file_put_contents(static::NOW_PLAYING_CAPTION_PATH, $track->caption);
     }
 
     private static function writeQrCode(Track $track): void

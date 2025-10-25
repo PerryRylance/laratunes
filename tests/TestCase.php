@@ -8,7 +8,6 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Storage;
 use Tests\Attributes\UsesRealOlaf;
 use ReflectionClass;
-use Tests\Attributes\UsesRealStorage;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -18,12 +17,11 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
+        Storage::fake('media');
+
         $reflect = new ReflectionClass($this);
 
         if(empty($reflect->getAttributes(UsesRealOlaf::class)))
             Olaf::fake();
-
-        if(empty($reflect->getAttributes(UsesRealStorage::class)))
-            Storage::fake('media');
     }
 }

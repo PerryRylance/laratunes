@@ -6,6 +6,7 @@ use App\Contracts\OlafContract;
 use App\Support\Olaf\QueryResults;
 use App\Support\Olaf\Stats;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 class OlafService implements OlafContract
 {
@@ -67,6 +68,14 @@ class OlafService implements OlafContract
         $params = ['file' => $filename];
         $qstr = http_build_query($params);
 
-        static::$client->request('DELETE', "delete.php?$qstr");
+        try{
+            static::$client->request('DELETE', "delete.php?$qstr");
+        }catch(ClientException $e) {
+            // NB: Gracefully handle when the file has already been deleted.. it shouldn't have been really, but the outcome is the same.
+            if(preg_match('/^File not found$/', $e->getMessage()))
+                return;
+
+            throw $e;
+        }
     }
 }

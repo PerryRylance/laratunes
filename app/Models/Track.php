@@ -110,8 +110,23 @@ class Track extends Model
 		);
 	}
 
-	// TODO: These should be query scopes really so we can sort by them
+	protected function caption(): Attribute
+	{
+		$artist = "Unknown Artist";
+        $title = "Unknown Title";
 
+        if(!empty($this->artist))
+            $artist = $this->artist;
+
+        if(!empty($this->title))
+            $title = $this->title;
+
+		return new Attribute(
+			get: fn() => $artist . ' - ' . $title
+		);
+	}
+
+	// TODO: These should be query scopes really so we can sort by them
 	protected function numUpVotes(): Attribute
 	{
 		return new Attribute(
