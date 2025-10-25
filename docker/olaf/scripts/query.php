@@ -16,7 +16,7 @@ if(!isset($_GET['file']))
     exit;
 }
 
-$file = $_POST['file'];
+$file = $_GET['file'];
 $absolute = "/root/audio/$file";
 
 if(!file_exists($absolute))

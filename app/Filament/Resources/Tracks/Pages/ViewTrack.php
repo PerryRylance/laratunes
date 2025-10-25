@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Tracks\Pages;
 
 use App\Filament\Resources\Tracks\TrackResource;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -14,6 +15,7 @@ class ViewTrack extends ViewRecord
     {
         return [
             EditAction::make(),
+            DeleteAction::make()
         ];
     }
 }

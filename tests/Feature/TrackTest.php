@@ -14,6 +14,7 @@ use DateTime;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Illuminate\Http\Response;
 use Livewire\Livewire;
 use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
@@ -204,6 +205,31 @@ class TrackTest extends TestCase
 
     }
 
+    public function testCreateChangesFilenameWhenAlreadyExists(): void
+    {
+        $existing = Track::factory()->uploaded()->create();
+        $content = file_get_contents("./tests/Fixtures/media/test.mp3");
+        $file = UploadedFile::fake()->createWithContent($existing->path, $content);
+
+        $response = Livewire::test(CreateTrack::class)
+            ->fillForm([
+                'attachment' => $file
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertRedirect();
+        
+        $url = $response->effects['redirect'];
+
+        if(!preg_match('/tracks\/(\d+)$/', $url, $m))
+            $this->fail('Failed to get ID from redirect URL');
+
+        $track = Track::findOrFail((int)$m[1]);
+
+        $this->assertNotEquals($existing->path, $track->path);
+        $this->assertTrue(Storage::disk('media')->exists($track->path));
+    }
+
     public function testView(): void
     {
         $track = Track::factory()->uploaded()->create();
@@ -334,8 +360,10 @@ class TrackTest extends TestCase
         $binary = Storage::disk('media')->get($track->path);
 
         $this
-            ->get("/api/audio/{$track->hash}")
-            ->assertSuccessful()
+            ->get("/api/audio/{$track->hash}", [
+                'Range' => 'bytes=0-'
+            ])
+            ->assertStatus(Response::HTTP_PARTIAL_CONTENT)
             ->assertHeader('Content-type', 'audio/mpeg')
             ->assertContent($binary);
     }
@@ -353,5 +381,10 @@ class TrackTest extends TestCase
     public function testViewHasAudioPlayer(): void
     {
 
+    }
+
+    public function testViewShowsDuplicates(): void
+    {
+        
     }
 }
