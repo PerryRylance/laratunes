@@ -56,7 +56,7 @@ class TransmissionService
 			'+genpts',
 
 			'-i',
-			Storage::disk('media')->path($background),
+			Storage::disk('media')->path($background), // TODO: Cryptic error if this doesn't exist, check that it exists first!
 
             '-f',
             BufferService::NOW_PLAYING_BUFFER_FORMAT,

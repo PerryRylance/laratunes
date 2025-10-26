@@ -17,7 +17,7 @@ abstract class MonitorChart extends ChartWidget
     protected function getData(): array
     {
         return [
-            'labels' => array_fill(0, MonitorService::HISTORY_SIZE, 'test') // NB: Required for the chart to display
+            'labels' => array_fill(0, MonitorService::HISTORY_SIZE, '') // NB: Required for the chart to display
         ];
     }
 
