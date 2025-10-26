@@ -31,10 +31,10 @@ class MonitorService
         switch($key)
         {
             case 'monitor:cpu':
+            case 'monitor:memory':
                 $value = array_map('floatval', $value);
                 break;
             
-            case 'monitor:memory':
             case 'monitor:buffer':
                 $value = array_map('intval', $value);
                 break;
@@ -43,7 +43,15 @@ class MonitorService
                 throw new LogicException();
         }
 
-        return $value ?? [];
+        if(!$value)
+            return [];
+
+        return array_reverse($value);
+    }
+
+    public static function getTotalMemory(): float
+    {
+        return Redis::get('monitor:memory_total');
     }
 
     private static function pushAndTrim(string $key, $arg): void
@@ -74,7 +82,9 @@ class MonitorService
         $total = floatval($m[1]);
         $used = floatval($m[2]);
 
-        static::pushAndTrim('monitor:memory', [$used, $total]);
+        Redis::set('monitor:memory_total', $total);
+
+        static::pushAndTrim('monitor:memory', $used);
     }
 
     private static function storeFifoUsage(): void

@@ -28,4 +28,5 @@ if(!file_exists($absolute))
 
 $escaped = escapeshellarg($absolute);
 
+// TODO: Might be able to do without --fragmented since we're only interested in whole songs
 echo shell_exec("/usr/local/bin/olaf query --no-identity-match --fragmented $escaped");

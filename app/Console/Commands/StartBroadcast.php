@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use App\Facades\Buffer;
 use App\Facades\Transmission;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Concurrency;
 
 class StartBroadcast extends Command
@@ -34,7 +35,8 @@ class StartBroadcast extends Command
 
         Concurrency::driver('fork')->run([
             fn() => Buffer::loop(),
-            fn() => Transmission::begin()
+            fn() => Transmission::begin(),
+            fn() => Artisan::call('app:monitor')
         ]);
 
         $this->fail('Broadcast stopped unexpectedly');
