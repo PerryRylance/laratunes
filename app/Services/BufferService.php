@@ -12,7 +12,7 @@ use chillerlan\QRCode\Output\QROutputInterface;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 use Fiber;
-
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Prompts\Output\ConsoleOutput;
 use Throwable;
@@ -74,6 +74,9 @@ class BufferService
 
         $file = Storage::disk('media')->path($track->path);
         $caption = static::NOW_PLAYING_CAPTION_PATH;
+
+        // TODO: Review, may be able to remove? The initial call wasn't working but this seems to work well
+        Process::run("set_fifo_size");
 
         $process = Ffmpeg::start('Bufferer', [
             '-y',
