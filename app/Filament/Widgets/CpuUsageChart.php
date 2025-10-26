@@ -21,7 +21,7 @@ class CpuUsageChart extends MonitorChart
         ];
     }
 
-    protected function getMaximum(): int|float
+    protected function getMaximum(): int|float|null
     {
         return 100;
     }

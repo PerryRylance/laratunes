@@ -21,7 +21,7 @@ class MemoryUsageChart extends MonitorChart
         ];
     }
 
-    protected function getMaximum(): int|float
+    protected function getMaximum(): int|float|null
     {
         return Monitor::getTotalMemory() / 1024;
     }

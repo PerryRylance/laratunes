@@ -33,6 +33,8 @@ class StartBroadcast extends Command
     {
         Log::info("Starting broadcast");
 
+        // TODO: Doesn't handle the transmission being cut well, need to know please
+
         Concurrency::driver('fork')->run([
             fn() => Buffer::loop(),
             fn() => Transmission::begin(),

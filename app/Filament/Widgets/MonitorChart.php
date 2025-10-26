@@ -12,7 +12,10 @@ abstract class MonitorChart extends ChartWidget
 {
     protected ?string $pollingInterval = '2s';
 
-    protected abstract function getMaximum(): int | float;
+    protected function getMaximum(): int | float | null
+    {
+        return null;
+    }
 
     protected function getData(): array
     {
@@ -23,6 +26,9 @@ abstract class MonitorChart extends ChartWidget
 
     protected function getOptions(): array|RawJs|null
     {
+        if($this->getMaximum() === null)
+            return null;
+
         return [
             'scales' => [
                 'y' => [

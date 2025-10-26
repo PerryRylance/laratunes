@@ -13,17 +13,17 @@ class BufferUsageChart extends MonitorChart
     protected function getData(): array
     {
         return [
+            ...parent::getData(),
             'datasets' => [
                 [
                     'label' => 'kB',
                     'data' => array_map(fn($bytes) => $bytes / 1024, Monitor::list('monitor:buffer')),
                 ],
-            ],
-            'labels' => array_fill(0, MonitorService::HISTORY_SIZE, '') // NB: Required for the chart to display
+            ]
         ];
     }
 
-    protected function getMaximum(): int|float
+    protected function getMaximum(): int|float|null
     {
         return 1024;
     }

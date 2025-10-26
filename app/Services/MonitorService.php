@@ -21,6 +21,7 @@ class MonitorService
         static::storeCpuUsage($output);
         static::storeMemoryUsage($output);
         static::storeFifoUsage();
+        static::storeTransmissionBitrate();
         static::storeUpdatedAt();
     }
 
@@ -32,6 +33,7 @@ class MonitorService
         {
             case 'monitor:cpu':
             case 'monitor:memory':
+            case 'monitor:bitrate':
                 $value = array_map('floatval', $value);
                 break;
             
@@ -94,6 +96,13 @@ class MonitorService
         $bytes = (int)$output;
 
         static::pushAndTrim('monitor:buffer', $bytes);
+    }
+
+    private static function storeTransmissionBitrate(): void
+    {
+        $bitrate = Redis::get('monitor:bitrate:transmitter') ?? 0;
+
+        static::pushAndTrim('monitor:bitrate', $bitrate);
     }
 
     private static function storeUpdatedAt(): void

@@ -41,7 +41,7 @@ class TransmissionService
         ]
             = config('broadcast');
 
-        $process = Ffmpeg::start('Transmitter', [
+        $process = Ffmpeg::start('Transmitter', priority: -10, params: [
             // NB: Broadcast in real time to avoid choking YouTube
 			'-re',
 
