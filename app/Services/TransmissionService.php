@@ -42,73 +42,81 @@ class TransmissionService
             = config('broadcast');
 
         $process = Ffmpeg::start('Transmitter', priority: -10, params: [
-            // NB: Broadcast in real time to avoid choking YouTube
-			'-re',
+            // Read input in real-time to avoid bursts
+    '-re',
 
-			// '-loglevel',
-			// 'verbose',
+    // Verbose logs for debugging
+    '-loglevel',
+    'debug',
 
-			'-stream_loop',
-			'-1',
+    // Loop the video indefinitely
+    '-stream_loop',
+    '-1',
 
-			// NB: Generate timestamps to avoid issues with looping video
-			'-fflags',
-			'+genpts',
+    // Generate timestamps to avoid issues with looping
+    '-fflags',
+    '+genpts',
 
-			'-i',
-			Storage::disk('media')->path($background), // TODO: Cryptic error if this doesn't exist, check that it exists first!
+    // Background video input
+    '-i',
+    Storage::disk('media')->path($background),
 
-            '-f',
-            BufferService::NOW_PLAYING_BUFFER_FORMAT,
-            '-i',
-            BufferService::NOW_PLAYING_BUFFER_PATH,
+    // Overlay video input (now playing)
+    '-f',
+    BufferService::NOW_PLAYING_BUFFER_FORMAT,
+    '-i',
+    BufferService::NOW_PLAYING_BUFFER_PATH,
 
-			// NB: Add the now playing video over our video loop
-			'-filter_complex',
-			"[0:v]scale={$width}:{$height}[bg];[1:v]colorkey=0x00FFFF:0.3:0.1[fg];[bg][fg]overlay=0:0[video];[video]split=2[v1][v2];[v2]fps=0.25[screenshot]",
+    // Filter complex: overlay now playing video onto background
+    '-filter_complex',
+    "[0:v]scale={$width}:{$height}[bg];[1:v]colorkey=0x00FFFF:0.3:0.1[fg];[bg][fg]overlay=0:0[video]",
 
-			'-map',
-			'[v1]',
+    // Map only the main video output
+    '-map',
+    '[video]',
 
-			'-map',
-			'1:a',
+    // Map audio from overlay video
+    '-map',
+    '1:a',
 
-			'-c:a',
-			'aac',
-			'-b:a',
-			'192k',
+    // Audio encoding and sync
+    '-c:a',
+    'aac',
+    '-b:a',
+    '192k',
+    '-af',
+    'aresample=resampler=soxr',
+    '-async',
+    '1',
 
-			// NB: Codec and bitrate
-			'-c:v',
-			'libx264',
+    // Video encoding and tuning
+    '-c:v',
+    'libx264',
+    '-crf',
+    '23',
+    '-preset',
+    'veryfast',
+    '-tune',
+    'zerolatency',
+    '-g',
+    '60',
+    '-vsync',
+    'passthrough',
 
-			// '-b:v',
-			// '2500k',
+    // Buffering / max delay tuning to reduce choppiness
+    '-bufsize',
+    '2M',
+    '-max_delay',
+    '500k',
 
-			// NB: Tune for YouTube
-			'-crf',
-			'23',
-			'-preset',
-			'veryfast',
-			'-tune',
-			'zerolatency',
-			'-g',
-			'60',
+    // Output format for RTMP
+    '-f',
+    'flv',
+    '-flvflags',
+    'no_duration_filesize',
 
-            '-f',
-            'flv',
-
-			$url,
-
-			'-map',
-			'[screenshot]',
-
-			'-f',
-			'image2',
-			'-update',
-			'1',
-			'-y',
-			'screenshot.jpg'
+    // RTMP URL
+    $url
 		]);
 
 		while($process->running())

@@ -14,7 +14,7 @@ class FfmpegService
     {
         $lower = strtolower($name);
 
-        return Process::timeout(false)->start(['nice', '-n', $priority, 'ffmpeg', ...$params], function (string $type, string $output) use ($name, $lower) {
+        return Process::timeout(false)->start([/* 'nice', '-n', $priority, */ 'ffmpeg', ...$params], function (string $type, string $output) use ($name, $lower) {
 
             if(preg_match('/bitrate=\s*(\d+(.\d+)?)kbits\/s/', $output, $m))
                 Redis::set("monitor:bitrate:$lower", $m[1]);
