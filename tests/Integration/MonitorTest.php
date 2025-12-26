@@ -7,9 +7,11 @@ use App\Services\BufferService;
 use DateTime;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Redis;
+use LogicException;
 use Mockery;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Tests\TestCase;
+use UnexpectedValueException;
 
 class MonitorTest extends TestCase
 {
@@ -29,8 +31,20 @@ class MonitorTest extends TestCase
     {
         $commands = [];
 
+        // NB: Mock this out because Redis is used as a store for ffmpeg bitrates
+        Redis::shouldReceive('get')->andReturnUsing(function($key) {
+            switch($key)
+            {
+                case 'monitor:bitrate:transmitter':
+                    return 1000;
+
+                default:
+                    throw new UnexpectedValueException();
+            }
+        });
+
         // NB: Mock this out for the updated_at just so there is a method there, even though we test this separately
-        Redis::shouldReceive('set')->once();
+        Redis::shouldReceive('set');
 
         Redis::shouldReceive('pipeline')
             ->andReturnUsing(function($callback) use (&$commands) {
@@ -80,9 +94,8 @@ class MonitorTest extends TestCase
     {
         $this->assertMetricHistory('monitor:memory', function($usage) {
 
-            $this->assertIsArray($usage);
-            $this->assertCount(2, $usage);
-            $this->assertLessThanOrEqual($usage[1], $usage[0]);
+            $this->assertIsFloat($usage);
+            $this->assertGreaterThan(0, $usage);
 
         });
     }
@@ -108,9 +121,13 @@ class MonitorTest extends TestCase
     public function testUpdatedAt(): void
     {
         Redis::shouldReceive('pipeline');
+        Redis::shouldReceive('get');
 
         Redis::shouldReceive('set')
             ->andReturnUsing(function($key, $value) {
+
+                if($key === 'monitor:memory_total')
+                    return 16384.0;
 
                 $this->assertEquals($key, 'monitor:updated_at');
 
