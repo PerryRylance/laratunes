@@ -43,80 +43,80 @@ class TransmissionService
 
         $process = Ffmpeg::start('Transmitter', priority: -10, params: [
             // Read input in real-time to avoid bursts
-    '-re',
+            '-re',
 
-    // Verbose logs for debugging
-    '-loglevel',
-    'debug',
+            // Verbose logs for debugging
+            '-loglevel',
+            'debug',
 
-    // Loop the video indefinitely
-    '-stream_loop',
-    '-1',
+            // Loop the video indefinitely
+            '-stream_loop',
+            '-1',
 
-    // Generate timestamps to avoid issues with looping
-    '-fflags',
-    '+genpts',
+            // Generate timestamps to avoid issues with looping
+            '-fflags',
+            '+genpts',
 
-    // Background video input
-    '-i',
-    Storage::disk('media')->path($background),
+            // Background video input
+            '-i',
+            Storage::disk('media')->path($background),
 
-    // Overlay video input (now playing)
-    '-f',
-    BufferService::NOW_PLAYING_BUFFER_FORMAT,
-    '-i',
-    BufferService::NOW_PLAYING_BUFFER_PATH,
+            // Overlay video input (now playing)
+            '-f',
+            BufferService::NOW_PLAYING_BUFFER_FORMAT,
+            '-i',
+            BufferService::NOW_PLAYING_BUFFER_PATH,
 
-    // Filter complex: overlay now playing video onto background
-    '-filter_complex',
-    "[0:v]scale={$width}:{$height}[bg];[1:v]colorkey=0x00FFFF:0.3:0.1[fg];[bg][fg]overlay=0:0[video]",
+            // Filter complex: overlay now playing video onto background
+            '-filter_complex',
+            "[0:v]scale={$width}:{$height}[bg];[1:v]colorkey=0x00FFFF:0.3:0.1[fg];[bg][fg]overlay=0:0[video]",
 
-    // Map only the main video output
-    '-map',
-    '[video]',
+            // Map only the main video output
+            '-map',
+            '[video]',
 
-    // Map audio from overlay video
-    '-map',
-    '1:a',
+            // Map audio from overlay video
+            '-map',
+            '1:a',
 
-    // Audio encoding and sync
-    '-c:a',
-    'aac',
-    '-b:a',
-    '192k',
-    '-af',
-    'aresample=resampler=soxr',
-    '-async',
-    '1',
+            // Audio encoding and sync
+            '-c:a',
+            'aac',
+            '-b:a',
+            '192k',
+            '-af',
+            'aresample=resampler=soxr',
+            '-async',
+            '1',
 
-    // Video encoding and tuning
-    '-c:v',
-    'libx264',
-    '-crf',
-    '23',
-    '-preset',
-    'veryfast',
-    '-tune',
-    'zerolatency',
-    '-g',
-    '60',
-    '-vsync',
-    'passthrough',
+            // Video encoding and tuning
+            '-c:v',
+            'libx264',
+            '-crf',
+            '23',
+            '-preset',
+            'veryfast',
+            '-tune',
+            'zerolatency',
+            '-g',
+            '60',
+            '-vsync',
+            'passthrough',
 
-    // Buffering / max delay tuning to reduce choppiness
-    '-bufsize',
-    '2M',
-    '-max_delay',
-    '500k',
+            // Buffering / max delay tuning to reduce choppiness
+            '-bufsize',
+            '2M',
+            '-max_delay',
+            '500k',
 
-    // Output format for RTMP
-    '-f',
-    'flv',
-    '-flvflags',
-    'no_duration_filesize',
+            // Output format for RTMP
+            '-f',
+            'flv',
+            '-flvflags',
+            'no_duration_filesize',
 
-    // RTMP URL
-    $url
+            // RTMP URL
+            $url
 		]);
 
 		while($process->running())

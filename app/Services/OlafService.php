@@ -39,7 +39,7 @@ class OlafService implements OlafContract
         return new Stats($body);
     }
 
-    public static function store(string $filename): void
+    public static function fingerprint(string $filename): void
     {
         static::maybeInitClient();
 

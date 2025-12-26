@@ -33,7 +33,7 @@ class TrackObserver
 
     public function created(Track $track): void
     {
-        Olaf::store($track->path);
+        Olaf::fingerprint($track->path);
 
         $duplicates = Olaf::query($track->path);
 

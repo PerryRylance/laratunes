@@ -26,8 +26,9 @@ class OlafTest extends TestCase
     {
         $file = TestFiles::all()->first();
 
-        TestFiles::store($file);
-        Olaf::store($file);
+        TestFiles::upload($file);
+
+        Olaf::fingerprint($file);
         Olaf::reset();
 
         $this->assertFileDoesNotExist('./.olaf/docker_dbs/db/data.mdb');
@@ -39,8 +40,8 @@ class OlafTest extends TestCase
         // NB: Store one file first otherwise it'll error because the Olaf DB doesn't exist
         $file = TestFiles::all()->first();
 
-        TestFiles::store($file);
-        Olaf::store($file);
+        TestFiles::upload($file);
+        Olaf::fingerprint($file);
 
         $stats = Olaf::stats();
 
@@ -54,8 +55,8 @@ class OlafTest extends TestCase
 
         $file = TestFiles::all()->first();
 
-        TestFiles::store($file);
-        Olaf::store($file);
+        TestFiles::upload($file);
+        Olaf::fingerprint($file);
 
         $this->assertEquals(1, Olaf::stats()->numberOfSongs);
     }
@@ -66,13 +67,13 @@ class OlafTest extends TestCase
         $expected = $files->take(1)->first();
         $others = $files->slice(1);
 
-        TestFiles::store($expected);
-        Olaf::store($expected);
+        TestFiles::upload($expected);
+        Olaf::fingerprint($expected);
 
         foreach($others as $other)
         {
-            TestFiles::store($other);
-            Olaf::store($other);
+            TestFiles::upload($other);
+            Olaf::fingerprint($other);
         }
 
         Storage::disk('media')->put('query.mp3', file_get_contents("./tests/Fixtures/media/$expected"));
@@ -91,12 +92,12 @@ class OlafTest extends TestCase
         $unexpected = $files->take(1)->first();
         $others = $files->slice(1);
 
-        TestFiles::store($unexpected);
+        TestFiles::upload($unexpected);
 
         foreach($others as $other)
         {
-            TestFiles::store($other);
-            Olaf::store($other);
+            TestFiles::upload($other);
+            Olaf::fingerprint($other);
         }
 
         $results = Olaf::query($unexpected);
@@ -108,8 +109,8 @@ class OlafTest extends TestCase
     {
         $file = TestFiles::all()->first();
 
-        TestFiles::store($file);
-        Olaf::store($file);
+        TestFiles::upload($file);
+        Olaf::fingerprint($file);
 
         Olaf::delete($file);
 

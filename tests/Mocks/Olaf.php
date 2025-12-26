@@ -15,7 +15,7 @@ class Olaf implements OlafContract
         return new Stats("");
     }
 
-    public static function store(string $filename): void{ }
+    public static function fingerprint(string $filename): void{ }
 
     public static function query(string $filename): QueryResults
     {

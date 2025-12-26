@@ -16,7 +16,7 @@ final class TestFiles
         ]);
     }
 
-    public static function store(string $filename)
+    public static function upload(string $filename)
     {
         return Storage::disk('media')->put($filename, file_get_contents("./tests/Fixtures/media/$filename"));
     }
