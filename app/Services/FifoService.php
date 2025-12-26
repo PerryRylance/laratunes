@@ -41,6 +41,9 @@ class FifoService
 
     public static function usage(): int
     {
-        return (int)Process::run('get_fifo_bytes_available')->output();
+        $result = Process::run('get_fifo_bytes_available');
+        $output = $result->output();
+
+        return (int)$output;
     }
 }
