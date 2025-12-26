@@ -3,7 +3,9 @@
 namespace Tests\Unit;
 
 use App\Models\Track;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Tests\TestCase;
+use Tests\TestFiles;
 
 class TrackTest extends TestCase
 {
@@ -22,6 +24,17 @@ class TrackTest extends TestCase
         ]);
 
         $this->assertEquals("Unknown Artist - Unknown Title", $track->caption);
+    }
+
+    public function testPathHasUniqueConstraint(): void
+    {
+        $file = TestFiles::all()->first();
+
+        Track::factory()->uploaded($file)->create();
+
+        $this->expectException(UniqueConstraintViolationException::class);
+
+        Track::factory()->uploaded($file)->create();
     }
 
     public function testAdminLink(): void
