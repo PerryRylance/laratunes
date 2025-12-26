@@ -12,6 +12,7 @@ use chillerlan\QRCode\Output\QROutputInterface;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 use Fiber;
+use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Prompts\Output\ConsoleOutput;
@@ -38,6 +39,10 @@ class BufferService
         }catch(Throwable $e) {
 
             Log::error("Error buffering: " . $e->getMessage());
+
+            $handler = new Handler(app());
+            $handler->report($e);
+
             exit(1);
 
         }
