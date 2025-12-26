@@ -13,7 +13,6 @@ return new class extends Migration
 	{
 		Schema::table('tracks', function (Blueprint $table) {
 			$table->unique('path');
-			$table->unique('hash');
 		});
 	}
 
@@ -24,7 +23,6 @@ return new class extends Migration
 	{
 		Schema::table('tracks', function (Blueprint $table) {
 			$table->dropUnique('path');
-			$table->dropUnique('hash');
 		});
 	}
 };
