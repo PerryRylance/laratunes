@@ -84,12 +84,14 @@ class TransmissionService
             'aac',
             '-b:a',
             '384k',
+            '-ar',
+            '48000', // NB: YouTube expects 48kHz
             '-ac',
             '2',
             '-af',
-            'aresample=resampler=soxr',
-            '-async',
-            '1',
+            'volume=-1dB,aresample=resampler=soxr',
+            // '-async',
+            // '1',
 
             // Video encoding and tuning
             '-c:v',
@@ -102,8 +104,8 @@ class TransmissionService
             '18',
             '-pix_fmt',
             'yuv420p',
-            '-b:v',
-            '10M', // NB: Recommended for 1080p, probably overkill for this
+            // '-b:v',
+            // '10M', // NB: Recommended for 1080p, probably overkill for this
 
             // NB: Recommended color space, breaks stream
             // '-vf',
@@ -124,8 +126,8 @@ class TransmissionService
             // '30',
             '-g',
             '15',
-            '-vsync',
-            'passthrough',
+            // '-vsync',
+            // 'passthrough',
             '-movflags',
             '+faststart',
 
@@ -138,8 +140,8 @@ class TransmissionService
             // Performance tweaks
             '-threads',
             '4',
-            '-cpu-used',
-            '0',
+            // '-cpu-used',
+            // '0',
 
             // Output format for RTMP
             '-f',
