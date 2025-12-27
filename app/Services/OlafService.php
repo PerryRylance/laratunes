@@ -72,7 +72,7 @@ class OlafService implements OlafContract
             static::$client->request('DELETE', "delete.php?$qstr");
         }catch(ClientException $e) {
             // NB: Gracefully handle when the file has already been deleted.. it shouldn't have been really, but the outcome is the same.
-            if(preg_match('/^File not found$/', $e->getMessage()))
+            if(preg_match('/^File not found$/m', $e->getMessage()))
                 return;
 
             throw $e;
