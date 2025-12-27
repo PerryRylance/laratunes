@@ -94,6 +94,8 @@ class TransmissionService
             // Video encoding and tuning
             '-c:v',
             'libx264',
+            '-profile:v',
+            'high',
             '-crf',
             '18',
             '-preset',
