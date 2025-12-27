@@ -57,6 +57,8 @@ You should now be able to access your instance of Laratunes via your domain.
 ### Accessing the admin panels
 You'll need to create a user account to access your instances admin panels by running `sail artisan make:filament-user` and following the steps.
 
+Once you've done that, run `sail artisan app:elevate-user-to-admin` passing the e-mail for your account as an argument.
+
 Visit `/admin` on your domain to log in.
 
 ## Usage
