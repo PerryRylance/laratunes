@@ -9,6 +9,7 @@ use App\Facades\Buffer;
 use App\Facades\Transmission;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Concurrency;
+use Spatie\Fork\Exceptions\CouldNotManageTask;
 
 class StartBroadcast extends Command
 {
@@ -35,13 +36,15 @@ class StartBroadcast extends Command
 
         // TODO: Doesn't handle the transmission being cut well, need to know please
 
-        Concurrency::driver('fork')->run([
-            fn() => Buffer::loop(),
-            fn() => Transmission::begin(),
-            fn() => Artisan::call('app:monitor')
-        ]);
-
-        $this->fail('Broadcast stopped unexpectedly');
+        try{
+            Concurrency::driver('fork')->run([
+                fn() => Buffer::loop(),
+                fn() => Transmission::begin(),
+                fn() => Artisan::call('app:monitor')
+            ]);
+        }catch(CouldNotManageTask) {
+            $this->fail('Broadcast stopped unexpectedly, check the logs for more information');
+        }
 
         // TODO: Trap sigterm? Differentiate between OS requested shutdown and processes ended unexpectedly?
     }
