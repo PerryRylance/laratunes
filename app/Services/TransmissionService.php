@@ -102,6 +102,8 @@ class TransmissionService
             '18',
             '-pix_fmt',
             'yuv420p',
+            '-coder',
+            '1',
             '-preset',
             'slow',
             '-tune',
