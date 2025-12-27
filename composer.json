@@ -81,7 +81,8 @@
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ],
         "stream": [
-            "nohup php artisan app:start-broadcast > storage/logs/broadcast.log 2>&1 &"
+            "nohup php artisan app:start-broadcast > storage/logs/broadcast.log 2>&1 &",
+            "nohup php artisan app:monitor > storage/logs/monitor.log 2>&1 &"
         ]
     },
     "extra": {
