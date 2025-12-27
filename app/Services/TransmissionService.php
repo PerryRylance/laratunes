@@ -102,12 +102,26 @@ class TransmissionService
             '18',
             '-pix_fmt',
             'yuv420p',
+            '-b:v',
+            '10M', // NB: Recommended for 1080p, probably overkill for this
+
+            // NB: Recommended color space, breaks stream
+            // '-vf',
+            // 'scale=out_color_matrix=bt709',
+            // '-color_primaries',
+            // 'bt709',
+            // '-color_trc bt709',
+            // '-colorspace bt709',
+
             '-coder',
             '1',
             '-preset',
             'slow',
             '-tune',
             'zerolatency',
+            // NB: 30fps is suggested here https://www.reddit.com/r/ffmpeg/comments/r1qwyy/best_streaming_settings_for_youtube/?rdt=49142 but this breaks the stream
+            // '-r',
+            // '30',
             '-g',
             '15',
             '-vsync',
@@ -120,6 +134,12 @@ class TransmissionService
             '2M',
             '-max_delay',
             '500k',
+
+            // Performance tweaks
+            '-threads',
+            '4',
+            '-cpu-used',
+            '0',
 
             // Output format for RTMP
             '-f',
