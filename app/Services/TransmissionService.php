@@ -110,6 +110,8 @@ class TransmissionService
             '15',
             '-vsync',
             'passthrough',
+            '-movflags',
+            '+faststart',
 
             // Buffering / max delay tuning to reduce choppiness
             '-bufsize',
