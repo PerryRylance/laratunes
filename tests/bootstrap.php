@@ -13,6 +13,6 @@ if(isset($values['MEDIA_PATH']))
     $output = new ConsoleOutput();
     $style = new OutputFormatterStyle('white', 'red');
     $output->getFormatter()->setStyle('error', $style);
-    $output->writeln('<error>MEDIA_PATH must not be set at build time or run time for tests</error>');
+    $output->writeln('<error>MEDIA_PATH must not be set at container start time or run time for tests, remove it from .env and restart the container with --force-recreate</error>');
     exit(1);
 }
