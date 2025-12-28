@@ -61,7 +61,6 @@ services:
         container_name: rtmp-sink
         ports:
             - "1935:1935"
-        restart: unless-stopped
         networks:
             - sail
 networks:
