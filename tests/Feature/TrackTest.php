@@ -88,12 +88,12 @@ class TrackTest extends AdminTestCase
 
     public function testSortByUpVotes(): void
     {
-
+        $this->markTestIncomplete('Voting not yet implemented');
     }
 
     public function testSortByDownVotes(): void
     {
-
+        $this->markTestIncomplete('Voting not yet implemented');
     }
 
     public function testLoadCreatePage(): void
@@ -326,7 +326,7 @@ class TrackTest extends AdminTestCase
 
     public function testDeleteRemovesVotes(): void
     {
-
+        $this->markTestIncomplete('Voting not yet implemented');
     }
 
     public function testNextIncrementsPlayCount(): void

@@ -138,16 +138,16 @@ class NightbotTest extends TestCase
 
     public function testSuggestSongSuccessful(): void
     {
-
+        $this->markTestIncomplete('Suggestions not yet implemented');
     }
 
     public function testSuggestMetadataSuccessful(): void
     {
-
+        $this->markTestIncomplete('Suggestions not yet implemented');
     }
 
     public function testRequestSongSuccessful(): void
     {
-
+        $this->markTestIncomplete('Requests not yet implemented');
     }
 }
