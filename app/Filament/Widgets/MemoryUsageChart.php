@@ -7,6 +7,7 @@ use App\Facades\Monitor;
 class MemoryUsageChart extends MonitorChart
 {
     protected ?string $heading = 'Memory Usage';
+    protected static ?int $sort = 1;
 
     protected function getData(): array
     {

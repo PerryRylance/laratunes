@@ -9,6 +9,7 @@ use Filament\Support\Colors\Color;
 class BufferUsageChart extends MonitorChart
 {
     protected ?string $heading = 'Buffer Usage';
+    protected static ?int $sort = 1;
 
     protected function getData(): array
     {

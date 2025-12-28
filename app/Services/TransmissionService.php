@@ -4,11 +4,14 @@ namespace App\Services;
 
 use App\Exceptions\TransmissionException;
 use App\Facades\Ffmpeg;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
+use Illuminate\Process\InvokedProcess;
 
 class TransmissionService
 {
@@ -154,8 +157,15 @@ class TransmissionService
 		]);
 
 		while($process->running())
-			usleep(500_000);
+        {
+            usleep(500_000);
+        }
 
 		throw new TransmissionException($process, 'Transmission stopped unexpectedly (Exit code {$process->exitCode()})');
 	}
+
+    public static function running(): bool
+    {
+        return preg_match('/ffmpeg.+\/buffers\/now-playing/ms', shell_exec('ps -eo pid,user,args --width 1000'));
+    }
 }

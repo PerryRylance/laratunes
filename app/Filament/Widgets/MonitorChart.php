@@ -11,6 +11,7 @@ use function PHPSTORM_META\map;
 abstract class MonitorChart extends ChartWidget
 {
     protected ?string $pollingInterval = '2s';
+    protected static ?int $sort = 1;
 
     protected function getMaximum(): int | float | null
     {

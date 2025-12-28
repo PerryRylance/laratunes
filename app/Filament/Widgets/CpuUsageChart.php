@@ -7,6 +7,7 @@ use App\Facades\Monitor;
 class CpuUsageChart extends MonitorChart
 {
     protected ?string $heading = 'CPU Usage';
+    protected static ?int $sort = 1;
 
     protected function getData(): array
     {
