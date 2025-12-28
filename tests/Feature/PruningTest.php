@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Media;
+namespace Tests\Feature;
 
 use App\Models\Track;
 use Illuminate\Support\Facades\Storage;
