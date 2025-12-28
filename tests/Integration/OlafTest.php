@@ -8,6 +8,7 @@ use App\Models\TrackHasDuplicates;
 use App\Facades\Olaf;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Kiwilan\Audio\Audio;
 use Livewire\Livewire;
 use Tests\TestCase;
 use Tests\Attributes\UsesRealOlaf;
@@ -117,12 +118,34 @@ class OlafTest extends TestCase
         $this->assertEquals(0, Olaf::stats()->numberOfSongs);
     }
 
-    // TODO: I am flakey when running the whole suite
     public function testCreatingTrackIdentifiesDuplicate(): void
     {
         $source = TestFiles::all()->first();
+        $extension = pathinfo($source, PATHINFO_EXTENSION);
         $content = file_get_contents("./tests/Fixtures/media/$source");
         $original = Track::factory()->uploaded($source)->create();
+
+        // NB: Need to slightly modify the file sot hat it doesn't have an identical hash
+        $modified = tempnam(sys_get_temp_dir(), 'duplicate') . ".$extension";
+
+        file_put_contents($modified, $content);
+
+        $audio = Audio::read($modified);
+        
+        $comment = 'Make it so that this duplicate file does not have the same hash as the original';
+
+        $audio
+            ->write()
+            ->comment($comment)
+            ->save();
+        
+        $audio = Audio::read($modified);
+
+        $this->assertEquals($comment, $audio->getComment());
+
+        $content = file_get_contents($modified);
+
+        // NB: Now do the actual form filling and upload
         $upload = UploadedFile::fake()->createWithContent('duplicate.mp3', $content);
 
         $response = Livewire::test(CreateTrack::class)
