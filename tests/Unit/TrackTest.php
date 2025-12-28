@@ -30,11 +30,11 @@ class TrackTest extends TestCase
     {
         $file = TestFiles::all()->first();
 
-        Track::factory()->uploaded($file)->create();
+        Track::factory()->uploaded(dst: $file)->create();
 
         $this->expectException(UniqueConstraintViolationException::class);
 
-        Track::factory()->uploaded($file)->create();
+        Track::factory()->uploaded(dst: $file)->create();
     }
 
     public function testAdminLink(): void

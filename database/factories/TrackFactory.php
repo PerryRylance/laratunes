@@ -34,20 +34,23 @@ class TrackFactory extends Factory
         ];
     }
 
-    public function uploaded(?string $filename = null): Factory
+    public function uploaded(?string $src = null, ?string $dst = null): Factory
     {
-        if($filename === null)
-            $src = fake()->randomElement(TestFiles::all());
-        else
-            $src = $filename;
-        
-        $dst = fake()->uuid() . '.mp3';
+        return $this->state(function(array $attributes) use ($src, $dst) {
 
-        Storage::disk('media')->put($dst, file_get_contents("./tests/Fixtures/media/$src"));
+            if($src === null)
+                $src = fake()->randomElement(TestFiles::all());
+            
+            if($dst === null)
+                $dst = fake()->uuid() . '.mp3';
 
-        return $this->state(fn (array $attributes) => [
-            'path' => $dst
-        ]);
+            Storage::disk('media')->put($dst, file_get_contents("./tests/Fixtures/media/$src"));
+
+            return [
+                'path' => $dst
+            ];
+
+        });
     }
 
     public function unplayed(): Factory
