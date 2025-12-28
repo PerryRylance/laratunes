@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AudioController;
+use App\Http\Middleware\Admin;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -35,7 +36,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('two-factor.show');
     
     // NB: Not really a web route, but allows us to use Filament's auth
-    Route::get('/api/audio/{hash}', [AudioController::class, 'get']);
+    Route::middleware(Admin::class)->get('/api/audio/{hash}', [AudioController::class, 'get']);
 });
 
 require __DIR__.'/auth.php';

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Tracks\Schemas;
 
 use App\Models\Track;
+use Closure;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
@@ -36,6 +37,20 @@ class TrackForm
                     ->preserveFilenames()
                     ->hiddenOn([Operation::View, Operation::Edit])
                     ->required()
+                    ->rules([
+                        fn (): Closure => function (string $attribute, $value, Closure $fail) {
+
+                            $query = Track::whereHash(md5_file($value->getRealPath()));
+
+                            if(!$query->exists())
+                                return;
+
+                            $existing = $query->firstOrFail()->path;
+
+                            $fail("This track already exists at $existing");
+
+                        },
+                    ])
                     ->saveUploadedFileUsing(function (FileUpload $component, TemporaryUploadedFile $file): string {
 
                         $storeMethod = $component->getVisibility() === 'public' ? 'storePubliclyAs' : 'storeAs';

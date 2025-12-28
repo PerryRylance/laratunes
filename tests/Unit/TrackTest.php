@@ -37,6 +37,17 @@ class TrackTest extends TestCase
         Track::factory()->uploaded(dst: $file)->create();
     }
 
+    public function testHashHasUniqueConstraint(): void
+    {
+        $file = TestFiles::all()->first();
+
+        Track::factory()->uploaded(src: $file)->create();
+
+        $this->expectException(UniqueConstraintViolationException::class);
+
+        Track::factory()->uploaded(src: $file)->create();
+    }
+
     public function testAdminLink(): void
     {
         

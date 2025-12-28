@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a88e222a3af76fdbf241a7defc7809d0",
+    "content-hash": "34ec85bf5137996d2aacfc510b5179a4",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2576,6 +2576,61 @@
             "time": "2025-10-14T13:58:31+00:00"
         },
         {
+            "name": "laravel/laravel",
+            "version": "v12.11.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/laravel.git",
+                "reference": "7663a8ce4cfe7a6a0d45148b55a339a7d440647d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/laravel/zipball/7663a8ce4cfe7a6a0d45148b55a339a7d440647d",
+                "reference": "7663a8ce4cfe7a6a0d45148b55a339a7d440647d",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "^12.0",
+                "laravel/tinker": "^2.10.1",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "fakerphp/faker": "^1.23",
+                "laravel/pail": "^1.2.2",
+                "laravel/pint": "^1.24",
+                "laravel/sail": "^1.41",
+                "mockery/mockery": "^1.6",
+                "nunomaduro/collision": "^8.6",
+                "phpunit/phpunit": "^11.5.3"
+            },
+            "type": "project",
+            "extra": {
+                "laravel": {
+                    "dont-discover": []
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\": "app/",
+                    "Database\\Seeders\\": "database/seeders/",
+                    "Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "The skeleton application for the Laravel framework.",
+            "keywords": [
+                "framework",
+                "laravel"
+            ],
+            "support": {
+                "source": "https://github.com/laravel/laravel/tree/v12.11.0"
+            },
+            "time": "2025-11-25T22:16:01+00:00"
+        },
+        {
             "name": "laravel/prompts",
             "version": "v0.3.7",
             "source": {
@@ -4645,6 +4700,51 @@
                 "source": "https://github.com/paragonie/constant_time_encoding"
             },
             "time": "2025-09-24T15:06:41+00:00"
+        },
+        {
+            "name": "perry-rylance/livewire-dom-assertion-provider",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PerryRylance/livewire-dom-assertions.git",
+                "reference": "b08f6426781fdc821f5dc3b296d13e325f39bb4a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PerryRylance/livewire-dom-assertions/zipball/b08f6426781fdc821f5dc3b296d13e325f39bb4a",
+                "reference": "b08f6426781fdc821f5dc3b296d13e325f39bb4a",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/laravel": "^12.0",
+                "livewire/livewire": "^3.0",
+                "php": "^8.4"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^12.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PerryRylance\\Livewire\\Providers\\": "includes/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PerryRylance",
+                    "email": "contact@perryrylance.dev"
+                }
+            ],
+            "description": "Adds methods to Livewire's Testable to assert elements exist / do not exist and count.",
+            "support": {
+                "issues": "https://github.com/PerryRylance/livewire-dom-assertions/issues",
+                "source": "https://github.com/PerryRylance/livewire-dom-assertions/tree/1.0.0"
+            },
+            "time": "2025-12-28T10:36:30+00:00"
         },
         {
             "name": "phpoption/phpoption",

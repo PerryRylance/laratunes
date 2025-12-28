@@ -19,16 +19,10 @@ use Livewire\Livewire;
 use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\AdminTestCase;
 
-class TrackTest extends TestCase
+class TrackTest extends AdminTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->actingAs(User::factory()->create());
-    }
-
     public function testIndex(): void
     {
         $tracks = Track::factory()->uploaded()->count(3)->create();
@@ -40,7 +34,7 @@ class TrackTest extends TestCase
 
     public function testSearchByTitleAndArtist(): void
     {
-        $tracks = Track::factory()->uploaded()->count(5)->create();
+        $tracks = Track::factory()->uploaded()->count(3)->create();
 
         Livewire::test(ListTracks::class)
             ->assertCanSeeTableRecords($tracks)
@@ -54,7 +48,7 @@ class TrackTest extends TestCase
 
     public function testSortByTitleAndArtist(): void
     {
-        $tracks = Track::factory()->uploaded()->count(5)->create();
+        $tracks = Track::factory()->uploaded()->count(3)->create();
 
         Livewire::test(ListTracks::class)
             ->assertCanSeeTableRecords($tracks)
@@ -70,7 +64,7 @@ class TrackTest extends TestCase
 
     public function testSortByPlayCount(): void
     {
-        $tracks = Track::factory()->uploaded()->count(5)->create();
+        $tracks = Track::factory()->uploaded()->count(3)->create();
 
         Livewire::test(ListTracks::class)
             ->assertCanSeeTableRecords($tracks)
@@ -82,7 +76,7 @@ class TrackTest extends TestCase
 
     public function testSortByLastPlayed(): void
     {
-        $tracks = Track::factory()->uploaded()->count(5)->create();
+        $tracks = Track::factory()->uploaded()->count(3)->create();
 
         Livewire::test(ListTracks::class)
             ->assertCanSeeTableRecords($tracks)
@@ -202,7 +196,16 @@ class TrackTest extends TestCase
 
     public function testCreateFailsWithNonUniqueHash(): void
     {
+        $existing = Track::factory()->uploaded('test.mp3')->create();
+        $content = file_get_contents("./tests/Fixtures/media/test.mp3");
+        $file = UploadedFile::fake()->createWithContent(fake()->uuid() . '.mp3', $content);
 
+        Livewire::test(CreateTrack::class)
+            ->fillForm([
+                'attachment' => $file
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['attachment']);
     }
 
     public function testCreateChangesFilenameWhenAlreadyExists(): void
@@ -306,7 +309,7 @@ class TrackTest extends TestCase
 
     public function testBulkDelete(): void
     {
-        $tracks = Track::factory()->uploaded()->count(5)->create();
+        $tracks = Track::factory()->uploaded()->count(3)->create();
 
         Livewire::test(ListTracks::class)
             ->assertCanSeeTableRecords($tracks)
@@ -353,7 +356,12 @@ class TrackTest extends TestCase
 
     public function testCanViewPath(): void
     {
+        $track = Track::factory()->uploaded()->create();
 
+        Livewire::test(ViewTrack::class, [
+            'record' => $track->id,
+        ])
+            ->assertSee($track->path);
     }
 
     public function testCanGetAudioBinary(): void
@@ -372,17 +380,43 @@ class TrackTest extends TestCase
 
     public function testGetAudioBinaryRespectsRequestedRange(): void
     {
-        
+        $track = Track::factory()->uploaded()->create();
+        $binary = Storage::disk('media')->get($track->path);
+        $expected = substr($binary, 0, 101);
+
+        $this
+            ->get("/api/audio/{$track->hash}", [
+                'Range' => 'bytes=0-100'
+            ])
+            ->assertStatus(Response::HTTP_PARTIAL_CONTENT)
+            ->assertHeader('Content-type', 'audio/mpeg')
+            ->assertContent($expected);
     }
 
     public function testUnauthorizedUsersCannotGetAudioBinary(): void
     {
+        // NB: These tests run as admin by default so make a regular user here - this route isn't guarded by Filament's access functions (since it's not part of a panel) so we test this explicitly
+        $user = User::factory()->create();
+        $track = Track::factory()->uploaded()->create();
+        Storage::disk('media')->get($track->path);
 
+        $this->actingAs($user);
+
+        $this
+            ->get("/api/audio/{$track->hash}", [
+                'Range' => 'bytes=0-'
+            ])
+            ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     public function testViewHasAudioPlayer(): void
     {
+        $track = Track::factory()->uploaded()->create();
 
+        Livewire::test(ViewTrack::class, [
+            'record' => $track->id,
+        ])
+            ->assertElementPresent("audio[src='/api/audio/{$track->hash}']");
     }
 
     public function testViewShowsDuplicates(): void

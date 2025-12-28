@@ -11,6 +11,8 @@ use Tests\TestFiles;
  */
 class TrackFactory extends Factory
 {
+    private static int $nextTestFileIndex = 0;
+
     /**
      * Define the model's default state.
      *
@@ -34,12 +36,23 @@ class TrackFactory extends Factory
         ];
     }
 
+    public function count(?int $count)
+    {
+        if($count > TestFiles::all()->count())
+            trigger_error("Factory is creating more tracks than there are test fixtures, you may see integrity constraint violation on hash", E_USER_WARNING);
+
+        return parent::count($count);
+    }
+
     public function uploaded(?string $src = null, ?string $dst = null): Factory
     {
         return $this->state(function(array $attributes) use ($src, $dst) {
 
             if($src === null)
-                $src = fake()->randomElement(TestFiles::all());
+            {
+                $files = TestFiles::all();
+                $src = $files[static::$nextTestFileIndex++ % $files->count()];
+            }
             
             if($dst === null)
                 $dst = fake()->uuid() . '.mp3';

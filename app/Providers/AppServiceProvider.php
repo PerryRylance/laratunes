@@ -9,9 +9,11 @@ use App\Services\FifoService;
 use App\Services\TransmissionService;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use PerryRylance\Livewire\Providers\DomAssertionProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if(App::runningUnitTests())
+            (new DomAssertionProvider(app()))->boot();
+
+        // NB: Stops the scripts being served up via HTTP
         if($this->app->environment('production'))
             URL::forceScheme('https');
     }
