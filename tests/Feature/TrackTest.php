@@ -479,14 +479,28 @@ class TrackTest extends AdminTestCase
     {
         [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
 
-        Livewire::test(ListTracks::class)
+        $original->duplicates()->attach($duplicate);
+
+        $records = Livewire::test(ListTracks::class)
             ->toggleAllTableColumns()
-            ->assertTableColumnExists('duplicates_count');
+            ->instance()
+            ->getTableRecords();
+
+        $this->assertEquals(1, $records[0]->duplicates_count);
     }
 
     public function testCanSeeOriginalsCountInTable(): void
     {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
 
+        $original->duplicates()->attach($duplicate);
+
+        $records = Livewire::test(ListTracks::class)
+            ->toggleAllTableColumns()
+            ->instance()
+            ->getTableRecords();
+
+        $this->assertEquals(1, $records[1]->originals_count);
     }
 
     public function testCanSortByDuplicateCount(): void
@@ -526,6 +540,6 @@ class TrackTest extends AdminTestCase
 
     public function testCanDetachOriginalsManually(): void
     {
-        
+
     }
 }
