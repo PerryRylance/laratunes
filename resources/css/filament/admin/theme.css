@@ -5,3 +5,10 @@
 
 @import 'tailwindcss';
 @import '../../../../vendor/livewire/flux/dist/flux.css';
+
+nav.fi-topbar .fi-logo a
+{
+    display: flex;
+    align-items: center;
+    margin-inline-start: .5rem;
+}

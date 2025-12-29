@@ -51,7 +51,7 @@ class MonitorService
         return array_reverse($value);
     }
 
-    public static function getTotalMemory(): float
+    public static function getTotalMemory(): ?float
     {
         return Redis::get('monitor:memory_total');
     }

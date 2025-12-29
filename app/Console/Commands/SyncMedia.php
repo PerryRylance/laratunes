@@ -27,6 +27,11 @@ class SyncMedia extends Command
     public function handle()
     {
         Artisan::call('app:prune-media');
+
+        echo Artisan::output();
+
         Artisan::call('app:discover-media');
+
+        echo Artisan::output();
     }
 }

@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 StatusWidget::class
             ])
+            ->brandLogo(fn () => view('filament.logo'))
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

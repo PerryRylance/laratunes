@@ -5,8 +5,6 @@ namespace App\Filament\Widgets;
 use App\Facades\Transmission;
 use App\Filament\Pages\Dashboard;
 use Filament\Widgets\Widget;
-use Illuminate\Http\RedirectResponse;
-use Livewire\Features\SupportRedirects\Redirector;
 
 class StatusWidget extends Widget
 {
@@ -26,8 +24,13 @@ class StatusWidget extends Widget
         chdir(base_path());
         exec("nohup php artisan app:start-broadcast > storage/logs/broadcast.log 2>&1 &", $output, $result);
 
-        // NB: Allow a few seconds for the stream to start
-        sleep(5);
+        $timer = 0;
+
+        while(!Transmission::running() && $timer++ < 10)
+            sleep(1);
+
+        // TODO: Flash or return error?
+        // TODO: Test out some popular scenarios like connection rejected
 
         return redirect()->to(Dashboard::getUrl());
     }
