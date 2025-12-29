@@ -75,6 +75,10 @@ This project uses [Laravel Sail](https://laravel.com/docs/12.x/sail) to run in d
 
 `sail up -d`
 
+If you intend to develop or run the browser tests then you should also run
+
+`sail npm run dev`
+
 ### Testing
 Tests can be run with `sail test`.
 

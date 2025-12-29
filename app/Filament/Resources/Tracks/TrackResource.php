@@ -41,7 +41,10 @@ class TrackResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            'duplicates' => RelationManagers\DuplicatesRelationManager::class,
+            'originals' => RelationManagers\OriginalsRelationManager::class
+        ];
     }
 
     public static function getPages(): array

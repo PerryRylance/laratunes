@@ -27,6 +27,16 @@ class TracksTable
                 TextColumn::make('last_played_at')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('duplicates_count')
+                    ->label('Duplicates')
+                    ->counts('duplicates')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('originals_count')
+                    ->label('Originals')
+                    ->counts('originals')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

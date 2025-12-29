@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Facades\Olaf;
 use App\Filament\Resources\Tracks\Pages\EditTrack;
 use App\Filament\Resources\Tracks\Pages\ViewTrack;
+use App\Filament\Resources\Tracks\RelationManagers\DuplicatesRelationManager;
+use App\Filament\Resources\Tracks\RelationManagers\OriginalsRelationManager;
 use Carbon\Carbon;
 use DateTime;
 use Filament\Actions\DeleteAction;
@@ -420,6 +422,109 @@ class TrackTest extends AdminTestCase
     }
 
     public function testViewShowsDuplicates(): void
+    {
+        // TODO: I really hate this "uploaded" pattern, can we not fake the hash in a service / facade? The only reason we have to keep doing this is because the observer wants to hash the actual file
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+        $original->duplicates()->attach($duplicate);
+
+        Livewire::test(ViewTrack::class, [
+            'record' => $original->id
+        ])
+            ->assertSeeLivewire(DuplicatesRelationManager::class)
+            ->assertSee('Duplicates');
+    }
+
+    public function testSeeDuplicatesInTable(): void
+    {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+        $original->duplicates()->attach($duplicate);
+
+        Livewire::test(DuplicatesRelationManager::class, [
+            'ownerRecord' => $original,
+            'pageClass' => ViewTrack::class
+        ])
+            ->assertCanSeeTableRecords([$duplicate]);
+    }
+
+    public function testViewShowsOriginals(): void
+    {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+        $original->duplicates()->attach($duplicate);
+
+        Livewire::test(ViewTrack::class, [
+            'record' => $duplicate->id
+        ])
+            ->set('activeRelationManager', 'originals')
+            ->assertSeeLivewire(OriginalsRelationManager::class)
+            ->assertSee('Originals');
+    }
+
+    public function testSeeOriginalsInTable(): void
+    {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+        $original->duplicates()->attach($duplicate);
+
+        Livewire::test(OriginalsRelationManager::class, [
+            'ownerRecord' => $duplicate,
+            'pageClass' => ViewTrack::class
+        ])
+            ->assertCanSeeTableRecords([$original]);
+    }
+
+    public function testCanSeeDuplicateCountInTable(): void
+    {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+        Livewire::test(ListTracks::class)
+            ->toggleAllTableColumns()
+            ->assertTableColumnExists('duplicates_count');
+    }
+
+    public function testCanSeeOriginalsCountInTable(): void
+    {
+
+    }
+
+    public function testCanSortByDuplicateCount(): void
+    {
+
+    }
+
+    public function testCanSortByOriginalsCount(): void
+    {
+
+    }
+
+    public function testCanFilterByHasDuplicates(): void
+    {
+
+    }
+
+    public function testCanFilterByHasOriginals(): void
+    {
+
+    }
+
+    public function testCanAttachDuplicatesManually(): void
+    {
+
+    }
+
+    public function testCanAttachOriginalsManually(): void
+    {
+
+    }
+
+    public function testCanDetachDuplicatesManually(): void
+    {
+
+    }
+
+    public function testCanDetachOriginalsManually(): void
     {
         
     }
