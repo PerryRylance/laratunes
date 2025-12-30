@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 class DuplicatesRelationManager extends RelationManager
 {
     protected static string $relationship = 'duplicates';
+    protected static ?string $inverseRelationship = 'originals';
 
     protected static ?string $relatedResource = TrackResource::class;
 

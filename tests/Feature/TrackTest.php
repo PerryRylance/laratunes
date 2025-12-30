@@ -13,8 +13,10 @@ use App\Filament\Resources\Tracks\RelationManagers\DuplicatesRelationManager;
 use App\Filament\Resources\Tracks\RelationManagers\OriginalsRelationManager;
 use Carbon\Carbon;
 use DateTime;
+use Filament\Actions\AttachAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DetachAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Http\Response;
 use Livewire\Livewire;
@@ -22,6 +24,8 @@ use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\AdminTestCase;
+use App\Models\TrackHasDuplicates;
+use Filament\Actions\DetachBulkAction;
 
 class TrackTest extends AdminTestCase
 {
@@ -583,21 +587,107 @@ class TrackTest extends AdminTestCase
 
     public function testCanAttachDuplicatesManually(): void
     {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
 
+        Livewire::test(DuplicatesRelationManager::class, [
+            'ownerRecord' => $original,
+            'pageClass' => EditTrack::class
+        ])
+            ->callAction(TestAction::make(AttachAction::class)->table(), [
+                'recordId' => $duplicate->id
+            ])
+            ->assertHasNoErrors();
+   
+        $original->duplicates()->first()->is($duplicate);
     }
 
     public function testCanAttachOriginalsManually(): void
     {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
 
+        Livewire::test(OriginalsRelationManager::class, [
+            'ownerRecord' => $duplicate,
+            'pageClass' => EditTrack::class
+        ])
+            ->callAction(TestAction::make(AttachAction::class)->table(), [
+                'recordId' => $original->id
+            ])
+            ->assertHasNoErrors();
+   
+        $duplicate->originals()->first()->is($original);
     }
 
     public function testCanDetachDuplicatesManually(): void
     {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
 
+        $original->duplicates()->attach($duplicate);
+
+        Livewire::test(DuplicatesRelationManager::class, [
+            'ownerRecord' => $original,
+            'pageClass' => EditTrack::class
+        ])
+            ->callAction(TestAction::make(DetachAction::class)->table($duplicate))
+            ->assertHasNoErrors();
+   
+        $this->assertEquals(0, $original->duplicates()->count());
     }
 
     public function testCanDetachOriginalsManually(): void
     {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
 
+        $original->duplicates()->attach($duplicate);
+
+        Livewire::test(OriginalsRelationManager::class, [
+            'ownerRecord' => $duplicate,
+            'pageClass' => EditTrack::class
+        ])
+            ->callAction(TestAction::make(DetachAction::class)->table($original))
+            ->assertHasNoErrors();
+   
+        $this->assertEquals(0, $duplicate->originals()->count());
+    }
+
+    public function testCanBulkDetachDuplicatesManually(): void
+    {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+        $original->duplicates()->attach($duplicate);
+
+        Livewire::test(DuplicatesRelationManager::class, [
+            'ownerRecord' => $original,
+            'pageClass' => EditTrack::class
+        ])
+            ->selectTableRecords([$duplicate])
+            ->callAction(TestAction::make(DetachBulkAction::class)->table()->bulk())
+            ->assertNotified()
+            ->assertCanNotSeeTableRecords([$duplicate]);
+        
+        $this->assertDatabaseMissing(TrackHasDuplicates::getTableName(), [
+            'original_id' => $original->id,
+            'duplicate_id' => $duplicate->id
+        ]);
+    }
+
+    public function testCanBulkDetachOriginalsManually(): void
+    {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+        $original->duplicates()->attach($duplicate);
+
+        Livewire::test(OriginalsRelationManager::class, [
+            'ownerRecord' => $duplicate,
+            'pageClass' => EditTrack::class
+        ])
+            ->selectTableRecords([$original])
+            ->callAction(TestAction::make(DetachBulkAction::class)->table()->bulk())
+            ->assertNotified()
+            ->assertCanNotSeeTableRecords([$original]);
+        
+        $this->assertDatabaseMissing(TrackHasDuplicates::getTableName(), [
+            'original_id' => $original->id,
+            'duplicate_id' => $duplicate->id
+        ]);
     }
 }
