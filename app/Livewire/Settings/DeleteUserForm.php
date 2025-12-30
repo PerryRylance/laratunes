@@ -8,19 +8,19 @@ use Livewire\Component;
 
 class DeleteUserForm extends Component
 {
-    public string $password = '';
+	public string $password = '';
 
-    /**
-     * Delete the currently authenticated user.
-     */
-    public function deleteUser(Logout $logout): void
-    {
-        $this->validate([
-            'password' => ['required', 'string', 'current_password'],
-        ]);
+	/**
+	 * Delete the currently authenticated user.
+	 */
+	public function deleteUser(Logout $logout): void
+	{
+		$this->validate([
+			'password' => ['required', 'string', 'current_password'],
+		]);
 
-        tap(Auth::user(), $logout(...))->delete();
+		tap(Auth::user(), $logout(...))->delete();
 
-        $this->redirect('/', navigate: true);
-    }
+		$this->redirect('/', navigate: true);
+	}
 }

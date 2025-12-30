@@ -7,10 +7,10 @@ use Tests\TestCase;
 
 class FifoTest extends TestCase
 {
-    public function testCreatedWithExpectedSize(): void
-    {
-        Fifo::create('/buffers/test');
+	public function testCreatedWithExpectedSize(): void
+	{
+		Fifo::create('/buffers/test');
 
-        $this->assertEquals(1024 * 1024, Fifo::capacity());
-    }
+		$this->assertEquals(1024 * 1024, Fifo::capacity());
+	}
 }

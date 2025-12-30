@@ -13,55 +13,55 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TracksTable
 {
-    public static function configure(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('title')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('artist')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('plays')
-                    ->sortable()
-                    ->toggleable(),
-                TextColumn::make('last_played_at')
-                    ->sortable()
-                    ->toggleable(),
-                TextColumn::make('duplicates_count')
-                    ->label('Duplicates')
-                    ->counts('duplicates')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('originals_count')
-                    ->label('Originals')
-                    ->counts('originals')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                Filter::make('has_duplicates')
-                    ->query(fn(Builder $query): Builder => $query->hasDuplicates()),
-                Filter::make('has_originals')
-                    ->query(fn(Builder $query): Builder => $query->hasOriginals()),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+	public static function configure(Table $table): Table
+	{
+		return $table
+			->columns([
+				TextColumn::make('title')
+					->searchable()
+					->sortable(),
+				TextColumn::make('artist')
+					->searchable()
+					->sortable(),
+				TextColumn::make('plays')
+					->sortable()
+					->toggleable(),
+				TextColumn::make('last_played_at')
+					->sortable()
+					->toggleable(),
+				TextColumn::make('duplicates_count')
+					->label('Duplicates')
+					->counts('duplicates')
+					->sortable()
+					->toggleable(isToggledHiddenByDefault: true),
+				TextColumn::make('originals_count')
+					->label('Originals')
+					->counts('originals')
+					->sortable()
+					->toggleable(isToggledHiddenByDefault: true),
+				TextColumn::make('created_at')
+					->dateTime()
+					->sortable()
+					->toggleable(isToggledHiddenByDefault: true),
+				TextColumn::make('updated_at')
+					->dateTime()
+					->sortable()
+					->toggleable(isToggledHiddenByDefault: true),
+			])
+			->filters([
+				Filter::make('has_duplicates')
+					->query(fn (Builder $query): Builder => $query->hasDuplicates()),
+				Filter::make('has_originals')
+					->query(fn (Builder $query): Builder => $query->hasOriginals()),
+			])
+			->recordActions([
+				ViewAction::make(),
+				EditAction::make(),
+			])
+			->toolbarActions([
+				BulkActionGroup::make([
+					DeleteBulkAction::make(),
+				]),
+			]);
+	}
 }

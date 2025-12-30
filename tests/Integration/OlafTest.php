@@ -2,188 +2,187 @@
 
 namespace Tests\Integration;
 
+use App\Facades\Olaf;
 use App\Filament\Resources\Tracks\Pages\CreateTrack;
 use App\Models\Track;
 use App\Models\TrackHasDuplicates;
-use App\Facades\Olaf;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Kiwilan\Audio\Audio;
 use Livewire\Livewire;
-use Tests\TestCase;
 use Tests\Attributes\UsesRealOlaf;
-use Tests\Attributes\UsesRealStorage;
+use Tests\TestCase;
 use Tests\TestFiles;
 
 #[UsesRealOlaf]
 class OlafTest extends TestCase
 {
-    protected function afterRefreshingDatabase()
-    {
-        Olaf::reset();
-    }
+	protected function afterRefreshingDatabase()
+	{
+		Olaf::reset();
+	}
 
-    public function testReset(): void
-    {
-        $file = TestFiles::all()->first();
+	public function testReset(): void
+	{
+		$file = TestFiles::all()->first();
 
-        TestFiles::upload($file);
+		TestFiles::upload($file);
 
-        Olaf::fingerprint($file);
-        Olaf::reset();
+		Olaf::fingerprint($file);
+		Olaf::reset();
 
-        $this->assertFileDoesNotExist('./.olaf/docker_dbs/db/data.mdb');
-        $this->assertFileDoesNotExist('./.olaf/docker_dbs/db/lock.mdb');
-    }
+		$this->assertFileDoesNotExist('./.olaf/docker_dbs/db/data.mdb');
+		$this->assertFileDoesNotExist('./.olaf/docker_dbs/db/lock.mdb');
+	}
 
-    public function testStats(): void
-    {
-        // NB: Store one file first otherwise it'll error because the Olaf DB doesn't exist
-        $file = TestFiles::all()->first();
+	public function testStats(): void
+	{
+		// NB: Store one file first otherwise it'll error because the Olaf DB doesn't exist
+		$file = TestFiles::all()->first();
 
-        TestFiles::upload($file);
-        Olaf::fingerprint($file);
+		TestFiles::upload($file);
+		Olaf::fingerprint($file);
 
-        $stats = Olaf::stats();
+		$stats = Olaf::stats();
 
-        $this->assertEquals(0, $stats->databaseFileSizeInMb);
-        $this->assertEquals(1, $stats->numberOfSongs);
-    }
+		$this->assertEquals(0, $stats->databaseFileSizeInMb);
+		$this->assertEquals(1, $stats->numberOfSongs);
+	}
 
-    public function testStore(): void
-    {
-        $this->assertEquals(0, Olaf::stats()->numberOfSongs);
+	public function testStore(): void
+	{
+		$this->assertEquals(0, Olaf::stats()->numberOfSongs);
 
-        $file = TestFiles::all()->first();
+		$file = TestFiles::all()->first();
 
-        TestFiles::upload($file);
-        Olaf::fingerprint($file);
+		TestFiles::upload($file);
+		Olaf::fingerprint($file);
 
-        $this->assertEquals(1, Olaf::stats()->numberOfSongs);
-    }
+		$this->assertEquals(1, Olaf::stats()->numberOfSongs);
+	}
 
-    public function testQuery(): void
-    {
-        $files = TestFiles::all();
-        $expected = $files->take(1)->first();
-        $others = $files->slice(1);
+	public function testQuery(): void
+	{
+		$files = TestFiles::all();
+		$expected = $files->take(1)->first();
+		$others = $files->slice(1);
 
-        TestFiles::upload($expected);
-        Olaf::fingerprint($expected);
+		TestFiles::upload($expected);
+		Olaf::fingerprint($expected);
 
-        foreach($others as $other)
-        {
-            TestFiles::upload($other);
-            Olaf::fingerprint($other);
-        }
+		foreach ($others as $other)
+		{
+			TestFiles::upload($other);
+			Olaf::fingerprint($other);
+		}
 
-        Storage::disk('media')->put('query.mp3', file_get_contents("./tests/Fixtures/media/$expected"));
+		Storage::disk('media')->put('query.mp3', file_get_contents("./tests/Fixtures/media/$expected"));
 
-        $results = Olaf::query('query.mp3');
+		$results = Olaf::query('query.mp3');
 
-        $best = $results->items->first();
+		$best = $results->items->first();
 
-        $this->assertEquals($expected, $best['file']);
-        $this->assertEquals(641, $best['confidence']);
-    }
+		$this->assertEquals($expected, $best['file']);
+		$this->assertEquals(641, $best['confidence']);
+	}
 
-    public function testQueryDoesNotYieldFalsePositives(): void
-    {
-        $files = TestFiles::all();
-        $unexpected = $files->take(1)->first();
-        $others = $files->slice(1);
+	public function testQueryDoesNotYieldFalsePositives(): void
+	{
+		$files = TestFiles::all();
+		$unexpected = $files->take(1)->first();
+		$others = $files->slice(1);
 
-        TestFiles::upload($unexpected);
+		TestFiles::upload($unexpected);
 
-        foreach($others as $other)
-        {
-            TestFiles::upload($other);
-            Olaf::fingerprint($other);
-        }
+		foreach ($others as $other)
+		{
+			TestFiles::upload($other);
+			Olaf::fingerprint($other);
+		}
 
-        $results = Olaf::query($unexpected);
+		$results = Olaf::query($unexpected);
 
-        $this->assertCount(0, $results->items);
-    }
+		$this->assertCount(0, $results->items);
+	}
 
-    public function testDelete(): void
-    {
-        $file = TestFiles::all()->first();
+	public function testDelete(): void
+	{
+		$file = TestFiles::all()->first();
 
-        TestFiles::upload($file);
-        Olaf::fingerprint($file);
+		TestFiles::upload($file);
+		Olaf::fingerprint($file);
 
-        Olaf::delete($file);
+		Olaf::delete($file);
 
-        $this->assertEquals(0, Olaf::stats()->numberOfSongs);
-    }
+		$this->assertEquals(0, Olaf::stats()->numberOfSongs);
+	}
 
-    public function testCreatingTrackIdentifiesDuplicate(): void
-    {
-        $source = TestFiles::all()->first();
-        $extension = pathinfo($source, PATHINFO_EXTENSION);
-        $content = file_get_contents("./tests/Fixtures/media/$source");
-        $original = Track::factory()->uploaded($source)->create();
+	public function testCreatingTrackIdentifiesDuplicate(): void
+	{
+		$source = TestFiles::all()->first();
+		$extension = pathinfo($source, PATHINFO_EXTENSION);
+		$content = file_get_contents("./tests/Fixtures/media/$source");
+		$original = Track::factory()->uploaded($source)->create();
 
-        // NB: Need to slightly modify the file sot hat it doesn't have an identical hash
-        $modified = tempnam(sys_get_temp_dir(), 'duplicate') . ".$extension";
+		// NB: Need to slightly modify the file sot hat it doesn't have an identical hash
+		$modified = tempnam(sys_get_temp_dir(), 'duplicate').".$extension";
 
-        file_put_contents($modified, $content);
+		file_put_contents($modified, $content);
 
-        $audio = Audio::read($modified);
-        
-        $comment = 'Make it so that this duplicate file does not have the same hash as the original';
+		$audio = Audio::read($modified);
 
-        $audio
-            ->write()
-            ->comment($comment)
-            ->save();
-        
-        $audio = Audio::read($modified);
+		$comment = 'Make it so that this duplicate file does not have the same hash as the original';
 
-        $this->assertEquals($comment, $audio->getComment());
+		$audio
+			->write()
+			->comment($comment)
+			->save();
 
-        $content = file_get_contents($modified);
+		$audio = Audio::read($modified);
 
-        // NB: Now do the actual form filling and upload
-        $upload = UploadedFile::fake()->createWithContent('duplicate.mp3', $content);
+		$this->assertEquals($comment, $audio->getComment());
 
-        $response = Livewire::test(CreateTrack::class)
-            ->fillForm([
-                'attachment' => $upload
-            ])
-            ->call('create')
-            ->assertNotified()
-            ->assertRedirect();
-        
-        $url = $response->effects['redirect'];
+		$content = file_get_contents($modified);
 
-        if(!preg_match('/tracks\/(\d+)$/', $url, $m))
-            $this->fail('Failed to get ID from redirect URL');
+		// NB: Now do the actual form filling and upload
+		$upload = UploadedFile::fake()->createWithContent('duplicate.mp3', $content);
 
-        $redirectId = (int)$m[1];
+		$response = Livewire::test(CreateTrack::class)
+			->fillForm([
+				'attachment' => $upload,
+			])
+			->call('create')
+			->assertNotified()
+			->assertRedirect();
 
-        // NB: Check the duplicaet is in the database
-        $this->assertDatabaseHas(TrackHasDuplicates::class, [
-            'original_id' => $original->id,
-            'duplicate_id' => $redirectId
-        ]);
+		$url = $response->effects['redirect'];
 
-        // NB: Check the mutual relationships
-        $track = Track::findOrFail($redirectId);
+		if (! preg_match('/tracks\/(\d+)$/', $url, $m))
+			$this->fail('Failed to get ID from redirect URL');
 
-        $this->assertEquals($track->id, $original->duplicates->first()->id);
-        $this->assertEquals($track->originals->first()->id, $original->id);
-    }
+		$redirectId = (int) $m[1];
 
-    public function testDeletingTrackRemovesFromOlaf(): void
-    {
-        $track = Track::factory()->uploaded()->create();
+		// NB: Check the duplicaet is in the database
+		$this->assertDatabaseHas(TrackHasDuplicates::class, [
+			'original_id' => $original->id,
+			'duplicate_id' => $redirectId,
+		]);
 
-        $this->assertEquals(1, Olaf::stats()->numberOfSongs);
+		// NB: Check the mutual relationships
+		$track = Track::findOrFail($redirectId);
 
-        $track->delete();
+		$this->assertEquals($track->id, $original->duplicates->first()->id);
+		$this->assertEquals($track->originals->first()->id, $original->id);
+	}
 
-        $this->assertEquals(0, Olaf::stats()->numberOfSongs);
-    }
+	public function testDeletingTrackRemovesFromOlaf(): void
+	{
+		$track = Track::factory()->uploaded()->create();
+
+		$this->assertEquals(1, Olaf::stats()->numberOfSongs);
+
+		$track->delete();
+
+		$this->assertEquals(0, Olaf::stats()->numberOfSongs);
+	}
 }

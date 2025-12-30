@@ -10,19 +10,19 @@ use Tests\TestCase;
 
 class NowPlayingTest extends TestCase
 {
-    public function testServiceIsMocked(): void
-    {
-        NowPlaying::fake();
-        Storage::fake();
-        Olaf::fake();
+	public function testServiceIsMocked(): void
+	{
+		NowPlaying::fake();
+		Storage::fake();
+		Olaf::fake();
 
-        $expected = Track::factory()->uploaded()->create();
-        $expected->update([
-            'hash' => '925bf0783aa48446bfe8181686525b6e'
-        ]);
+		$expected = Track::factory()->uploaded()->create();
+		$expected->update([
+			'hash' => '925bf0783aa48446bfe8181686525b6e',
+		]);
 
-        $actual = NowPlaying::track();
+		$actual = NowPlaying::track();
 
-        $this->assertTrue($actual->is($expected));
-    }
+		$this->assertTrue($actual->is($expected));
+	}
 }

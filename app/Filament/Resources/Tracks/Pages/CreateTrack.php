@@ -5,20 +5,19 @@ namespace App\Filament\Resources\Tracks\Pages;
 use App\Filament\Resources\Tracks\TrackResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class CreateTrack extends CreateRecord
 {
-    protected static string $resource = TrackResource::class;
+	protected static string $resource = TrackResource::class;
 
-    protected function handleRecordCreation(array $data): Model
-    {
-        $path = $data['attachment'];
+	protected function handleRecordCreation(array $data): Model
+	{
+		$path = $data['attachment'];
 
-        unset($data['attachment']);
+		unset($data['attachment']);
 
-        $data['path'] = $path;
+		$data['path'] = $path;
 
-        return static::getModel()::create($data);
-    }
+		return static::getModel()::create($data);
+	}
 }

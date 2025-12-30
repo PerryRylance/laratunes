@@ -2,9 +2,7 @@
 
 namespace App\Exceptions;
 
-use Exception;
-
 class BufferException extends FfmpegException
 {
-    //
+	//
 }

@@ -9,13 +9,13 @@ use Filament\Resources\Pages\ViewRecord;
 
 class ViewTrack extends ViewRecord
 {
-    protected static string $resource = TrackResource::class;
+	protected static string $resource = TrackResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-            DeleteAction::make()
-        ];
-    }
+	protected function getHeaderActions(): array
+	{
+		return [
+			EditAction::make(),
+			DeleteAction::make(),
+		];
+	}
 }

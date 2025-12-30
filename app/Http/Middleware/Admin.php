@@ -8,16 +8,16 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Admin
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
-    {
-        if($request->user()?->is_admin)
-            return $next($request);
+	/**
+	 * Handle an incoming request.
+	 *
+	 * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+	 */
+	public function handle(Request $request, Closure $next): Response
+	{
+		if ($request->user()?->is_admin)
+			return $next($request);
 
-        return new Response(status: Response::HTTP_FORBIDDEN);
-    }
+		return new Response(status: Response::HTTP_FORBIDDEN);
+	}
 }

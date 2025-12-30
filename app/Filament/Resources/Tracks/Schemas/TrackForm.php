@@ -15,76 +15,77 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class TrackForm
 {
-    public static function configure(Schema $schema): Schema
-    {
-        $hasDuplicates = $hasOriginals = false;
+	public static function configure(Schema $schema): Schema
+	{
+		$hasDuplicates = $hasOriginals = false;
 
-        if($schema->model instanceof Track)
-        {
-            $hasDuplicates = $schema->model->duplicates()->exists();
-            $hasOriginals = $schema->model->originals()->exists();
-        }
+		if ($schema->model instanceof Track)
+		{
+			$hasDuplicates = $schema->model->duplicates()->exists();
+			$hasOriginals = $schema->model->originals()->exists();
+		}
 
-        return $schema
-            ->components([
-                FileUpload::make('attachment')
-                    ->disk('media')
-                    ->acceptedFileTypes([
-                        'audio/mpeg',
-                        'audio/ogg',
-                        'audio/flac'
-                    ])
-                    ->preserveFilenames()
-                    ->hiddenOn([Operation::View, Operation::Edit])
-                    ->required()
-                    ->rules([
-                        fn (): Closure => function (string $attribute, $value, Closure $fail) {
+		return $schema
+			->components([
+				FileUpload::make('attachment')
+					->disk('media')
+					->acceptedFileTypes([
+						'audio/mpeg',
+						'audio/ogg',
+						'audio/flac',
+					])
+					->preserveFilenames()
+					->hiddenOn([Operation::View, Operation::Edit])
+					->required()
+					->rules([
+						fn (): Closure => function (string $attribute, $value, Closure $fail) {
 
-                            $query = Track::whereHash(md5_file($value->getRealPath()));
+							$query = Track::whereHash(md5_file($value->getRealPath()));
 
-                            if(!$query->exists())
-                                return;
+							if (! $query->exists())
+							return;
 
-                            $existing = $query->firstOrFail()->path;
+							$existing = $query->firstOrFail()->path;
 
-                            $fail("This track already exists at $existing");
+							$fail("This track already exists at $existing");
 
-                        },
-                    ])
-                    ->saveUploadedFileUsing(function (FileUpload $component, TemporaryUploadedFile $file): string {
+						},
+					])
+					->saveUploadedFileUsing(function (FileUpload $component, TemporaryUploadedFile $file): string {
 
-                        $storeMethod = $component->getVisibility() === 'public' ? 'storePubliclyAs' : 'storeAs';
+						$storeMethod = $component->getVisibility() === 'public' ? 'storePubliclyAs' : 'storeAs';
 
-                        $filename = $file->getClientOriginalName();
+						$filename = $file->getClientOriginalName();
 
-                        if(Storage::disk('media')->exists($filename))
-                        {
-                            $suffixNumber = 0;
+						if (Storage::disk('media')->exists($filename))
+						{
+							$suffixNumber = 0;
 
-                            do{
+							do
+							{
 
-                                $suffixNumber++;
-                                $modifiedFilename = "$filename ($suffixNumber)";
+								$suffixNumber++;
+								$modifiedFilename = "$filename ($suffixNumber)";
 
-                            }while(Storage::disk('media')->exists($modifiedFilename));
+							}
+							while (Storage::disk('media')->exists($modifiedFilename));
 
-                            $filename = $modifiedFilename;
-                        }
+							$filename = $modifiedFilename;
+						}
 
-                        return $file->{$storeMethod}($component->getDirectory(), $filename, $component->getDiskName());
+						return $file->{$storeMethod}($component->getDirectory(), $filename, $component->getDiskName());
 
-                    })
-                    ,
-                TextInput::make('title')
-                    ->hiddenOn(Operation::Create),
-                TextInput::make('artist')
-                    ->hiddenOn(Operation::Create),
-                TextEntry::make('path')
-                    ->label('Path')
-                    ->hiddenOn([Operation::Create]),
-                ViewField::make('audio')
-                    ->view('filament.forms.fields.audio-player')
-                    ->hiddenOn([Operation::Create])
-            ]);
-    }
+					}),
+				TextInput::make('title')
+					->hiddenOn(Operation::Create),
+				TextInput::make('artist')
+					->hiddenOn(Operation::Create),
+				TextEntry::make('path')
+					->label('Path')
+					->hiddenOn([Operation::Create]),
+				ViewField::make('audio')
+					->view('filament.forms.fields.audio-player')
+					->hiddenOn([Operation::Create]),
+			]);
+	}
 }

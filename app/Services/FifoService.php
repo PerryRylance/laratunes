@@ -2,48 +2,48 @@
 
 namespace App\Services;
 
-use App\Exceptions\BufferException;
 use Illuminate\Support\Facades\Process;
 
 class FifoService
 {
-    private static $keepOpenHandle;
-    private static int $capacity;
+	private static $keepOpenHandle;
 
-    public static function create(string $file): void
-    {
-        $result = Process::run("rm -f $file && mkfifo $file");
+	private static int $capacity;
 
-        if($result->failed())
-        {
-            $output = trim($result->errorOutput());
-            $message = "Failed to create now playing buffer ($output)";
+	public static function create(string $file): void
+	{
+		$result = Process::run("rm -f $file && mkfifo $file");
 
-            throw new \Exception($message);
-        }
+		if ($result->failed())
+		{
+			$output = trim($result->errorOutput());
+			$message = "Failed to create now playing buffer ($output)";
 
-        $result = Process::run("set_fifo_size");
-        $output = $result->output();
+			throw new \Exception($message);
+		}
 
-        if($result->failed())
-            throw new \Exception("Failed to set FIFO size: {$output} ({$result->exitCode()})");
+		$result = Process::run('set_fifo_size');
+		$output = $result->output();
 
-        if(!preg_match('/FIFO buffer size successfully set to (\d+) bytes/', $output, $m))
-            throw new \Exception("Failed to match created FIFO size in $output");
+		if ($result->failed())
+			throw new \Exception("Failed to set FIFO size: {$output} ({$result->exitCode()})");
 
-        static::$capacity = (int)$m[1];
-    }
+		if (! preg_match('/FIFO buffer size successfully set to (\d+) bytes/', $output, $m))
+			throw new \Exception("Failed to match created FIFO size in $output");
 
-    public static function capacity(): int
-    {
-        return static::$capacity;
-    }
+		static::$capacity = (int) $m[1];
+	}
 
-    public static function usage(): int
-    {
-        $result = Process::run('get_fifo_bytes_available');
-        $output = $result->output();
+	public static function capacity(): int
+	{
+		return static::$capacity;
+	}
 
-        return (int)$output;
-    }
+	public static function usage(): int
+	{
+		$result = Process::run('get_fifo_bytes_available');
+		$output = $result->output();
+
+		return (int) $output;
+	}
 }

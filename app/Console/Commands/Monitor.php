@@ -8,35 +8,33 @@ use Illuminate\Console\Command;
 
 class Monitor extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:monitor {--once}';
+	/**
+	 * The name and signature of the console command.
+	 *
+	 * @var string
+	 */
+	protected $signature = 'app:monitor {--once}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Monitors system health and performance';
+	/**
+	 * The console command description.
+	 *
+	 * @var string
+	 */
+	protected $description = 'Monitors system health and performance';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
-    {
-        while(true)
-        {
-            Facade::update();
+	/**
+	 * Execute the console command.
+	 */
+	public function handle()
+	{
+		while (true)
+		{
+			Facade::update();
 
-            if($this->option('once'))
-                break;
+			if ($this->option('once'))
+			break;
 
-            sleep(MonitorService::INTERVAL_SECONDS);
-        }
-    }
-
-    
+			sleep(MonitorService::INTERVAL_SECONDS);
+		}
+	}
 }

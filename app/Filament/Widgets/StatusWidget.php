@@ -8,30 +8,32 @@ use Filament\Widgets\Widget;
 
 class StatusWidget extends Widget
 {
-    public bool $transmitting;
+	public bool $transmitting;
 
-    protected string $view = 'filament.widgets.status-widget';
-    protected static ?int $sort = 0;
-    protected int | string | array $columnSpan = 'full';
+	protected string $view = 'filament.widgets.status-widget';
 
-    public function __construct()
-    {
-        $this->transmitting = Transmission::running();
-    }
+	protected static ?int $sort = 0;
 
-    public function broadcast()
-    {
-        chdir(base_path());
-        exec("nohup php artisan app:start-broadcast > storage/logs/broadcast.log 2>&1 &", $output, $result);
+	protected int|string|array $columnSpan = 'full';
 
-        $timer = 0;
+	public function __construct()
+	{
+		$this->transmitting = Transmission::running();
+	}
 
-        while(!Transmission::running() && $timer++ < 10)
-            sleep(1);
+	public function broadcast()
+	{
+		chdir(base_path());
+		exec('nohup php artisan app:start-broadcast > storage/logs/broadcast.log 2>&1 &', $output, $result);
 
-        // TODO: Flash or return error?
-        // TODO: Test out some popular scenarios like connection rejected
+		$timer = 0;
 
-        return redirect()->to(Dashboard::getUrl());
-    }
+		while (! Transmission::running() && $timer++ < 10)
+			sleep(1);
+
+		// TODO: Flash or return error?
+		// TODO: Test out some popular scenarios like connection rejected
+
+		return redirect()->to(Dashboard::getUrl());
+	}
 }

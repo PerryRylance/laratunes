@@ -10,72 +10,75 @@ use GuzzleHttp\Exception\ClientException;
 
 class OlafService implements OlafContract
 {
-    private static ?Client $client = null;
+	private static ?Client $client = null;
 
-    private static function maybeInitClient(): void
-    {
-        if(static::$client)
-            return;
+	private static function maybeInitClient(): void
+	{
+		if (static::$client)
+		return;
 
-        static::$client = new \GuzzleHttp\Client([
-            'base_uri' => 'http://host.docker.internal:5000/'
-        ]);
-    }
+		static::$client = new \GuzzleHttp\Client([
+			'base_uri' => 'http://host.docker.internal:5000/',
+		]);
+	}
 
-    public static function reset(): void
-    {
-        static::maybeInitClient();
+	public static function reset(): void
+	{
+		static::maybeInitClient();
 
-        static::$client->request('DELETE', 'reset.php');
-    }
+		static::$client->request('DELETE', 'reset.php');
+	}
 
-    public static function stats(): Stats
-    {
-        static::maybeInitClient();
+	public static function stats(): Stats
+	{
+		static::maybeInitClient();
 
-        $response = static::$client->request('GET', 'stats.php');
-        $body = (string)$response->getBody();
+		$response = static::$client->request('GET', 'stats.php');
+		$body = (string) $response->getBody();
 
-        return new Stats($body);
-    }
+		return new Stats($body);
+	}
 
-    public static function fingerprint(string $filename): void
-    {
-        static::maybeInitClient();
+	public static function fingerprint(string $filename): void
+	{
+		static::maybeInitClient();
 
-        static::$client->request('POST', 'store.php', [
-            'form_params' => [
-                'file' => $filename
-            ]
-        ]);
-    }
+		static::$client->request('POST', 'store.php', [
+			'form_params' => [
+				'file' => $filename,
+			],
+		]);
+	}
 
-    public static function query(string $filename): QueryResults
-    {
-        static::maybeInitClient();
+	public static function query(string $filename): QueryResults
+	{
+		static::maybeInitClient();
 
-        $params = ['file' => $filename];
-        $qstr = http_build_query($params);
-        $body = (string)static::$client->request('GET', "query.php?$qstr")->getBody();
+		$params = ['file' => $filename];
+		$qstr = http_build_query($params);
+		$body = (string) static::$client->request('GET', "query.php?$qstr")->getBody();
 
-        return new QueryResults($filename, $body);
-    }
+		return new QueryResults($filename, $body);
+	}
 
-    public static function delete(string $filename): void
-    {
-        static::maybeInitClient();
+	public static function delete(string $filename): void
+	{
+		static::maybeInitClient();
 
-        $params = ['file' => $filename];
-        $qstr = http_build_query($params);
+		$params = ['file' => $filename];
+		$qstr = http_build_query($params);
 
-        try{
-            static::$client->request('DELETE', "delete.php?$qstr");
-        }catch(ClientException $e) {
-            // NB: Gracefully handle when the file has already been deleted.. it shouldn't have been really, but the outcome is the same.
-            if(preg_match('/^File not found$/m', $e->getMessage()))
-                return;
+		try
+		{
+			static::$client->request('DELETE', "delete.php?$qstr");
+		}
+		catch (ClientException $e)
+		{
+			// NB: Gracefully handle when the file has already been deleted.. it shouldn't have been really, but the outcome is the same.
+			if (preg_match('/^File not found$/m', $e->getMessage()))
+			return;
 
-            throw $e;
-        }
-    }
+			throw $e;
+		}
+	}
 }

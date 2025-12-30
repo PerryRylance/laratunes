@@ -6,22 +6,22 @@ use App\Facades\Olaf;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Storage;
-use Tests\Attributes\UsesRealOlaf;
 use ReflectionClass;
+use Tests\Attributes\UsesRealOlaf;
 
 abstract class TestCase extends BaseTestCase
 {
-    use RefreshDatabase;
+	use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+	protected function setUp(): void
+	{
+		parent::setUp();
 
-        Storage::fake('media');
+		Storage::fake('media');
 
-        $reflect = new ReflectionClass($this);
+		$reflect = new ReflectionClass($this);
 
-        if(empty($reflect->getAttributes(UsesRealOlaf::class)))
-            Olaf::fake();
-    }
+		if (empty($reflect->getAttributes(UsesRealOlaf::class)))
+			Olaf::fake();
+	}
 }

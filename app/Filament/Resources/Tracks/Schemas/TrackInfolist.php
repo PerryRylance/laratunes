@@ -6,11 +6,11 @@ use Filament\Schemas\Schema;
 
 class TrackInfolist
 {
-    public static function configure(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                //
-            ]);
-    }
+	public static function configure(Schema $schema): Schema
+	{
+		return $schema
+			->components([
+				//
+			]);
+	}
 }

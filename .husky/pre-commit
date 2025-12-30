@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run your custom Stout formatting script via Sail
+./vendor/bin/sail up -d
+./vendor/bin/sail composer run format
+
+# Re-add the files to the commit if Stout modified them
+git add .

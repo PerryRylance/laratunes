@@ -6,29 +6,30 @@ use App\Facades\Monitor;
 
 class MemoryUsageChart extends MonitorChart
 {
-    protected ?string $heading = 'Memory Usage';
-    protected static ?int $sort = 1;
+	protected ?string $heading = 'Memory Usage';
 
-    protected function getData(): array
-    {
-        return [
-            ...parent::getData(),
-            'datasets' => [
-                [
-                    'label' => 'GB',
-                    'data' => array_map(fn($mb) => $mb / 1024, Monitor::list('monitor:memory')),
-                ],
-            ]
-        ];
-    }
+	protected static ?int $sort = 1;
 
-    protected function getMaximum(): int|float|null
-    {
-        return Monitor::getTotalMemory() / 1024;
-    }
+	protected function getData(): array
+	{
+		return [
+			...parent::getData(),
+			'datasets' => [
+				[
+					'label' => 'GB',
+					'data' => array_map(fn ($mb) => $mb / 1024, Monitor::list('monitor:memory')),
+				],
+			],
+		];
+	}
 
-    protected function getType(): string
-    {
-        return 'line';
-    }
+	protected function getMaximum(): int|float|null
+	{
+		return Monitor::getTotalMemory() / 1024;
+	}
+
+	protected function getType(): string
+	{
+		return 'line';
+	}
 }

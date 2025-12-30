@@ -18,42 +18,42 @@ use Filament\Tables\Table;
 
 class TrackResource extends Resource
 {
-    protected static ?string $model = Track::class;
+	protected static ?string $model = Track::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMusicalNote;
+	protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMusicalNote;
 
-    protected static ?string $recordTitleAttribute = 'title';
+	protected static ?string $recordTitleAttribute = 'title';
 
-    public static function form(Schema $schema): Schema
-    {
-        return TrackForm::configure($schema);
-    }
+	public static function form(Schema $schema): Schema
+	{
+		return TrackForm::configure($schema);
+	}
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return TrackInfolist::configure($schema);
-    }
+	public static function infolist(Schema $schema): Schema
+	{
+		return TrackInfolist::configure($schema);
+	}
 
-    public static function table(Table $table): Table
-    {
-        return TracksTable::configure($table);
-    }
+	public static function table(Table $table): Table
+	{
+		return TracksTable::configure($table);
+	}
 
-    public static function getRelations(): array
-    {
-        return [
-            'duplicates' => RelationManagers\DuplicatesRelationManager::class,
-            'originals' => RelationManagers\OriginalsRelationManager::class
-        ];
-    }
+	public static function getRelations(): array
+	{
+		return [
+			'duplicates' => RelationManagers\DuplicatesRelationManager::class,
+			'originals' => RelationManagers\OriginalsRelationManager::class,
+		];
+	}
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListTracks::route('/'),
-            'create' => CreateTrack::route('/create'),
-            'view' => ViewTrack::route('/{record}'),
-            'edit' => EditTrack::route('/{record}/edit'),
-        ];
-    }
+	public static function getPages(): array
+	{
+		return [
+			'index' => ListTracks::route('/'),
+			'create' => CreateTrack::route('/create'),
+			'view' => ViewTrack::route('/{record}'),
+			'edit' => EditTrack::route('/{record}/edit'),
+		];
+	}
 }

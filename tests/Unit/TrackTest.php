@@ -9,47 +9,44 @@ use Tests\TestFiles;
 
 class TrackTest extends TestCase
 {
-    public function testCaptionIsArtistThenTitle(): void
-    {
-        $track = Track::factory()->uploaded()->create();
+	public function testCaptionIsArtistThenTitle(): void
+	{
+		$track = Track::factory()->uploaded()->create();
 
-        $this->assertEquals("{$track->artist} - {$track->title}", $track->caption);
-    }
+		$this->assertEquals("{$track->artist} - {$track->title}", $track->caption);
+	}
 
-    public function testUnknownArtistAndTitleCaption(): void
-    {
-        $track = Track::factory()->uploaded()->create([
-            'artist' => null,
-            'title' => null
-        ]);
+	public function testUnknownArtistAndTitleCaption(): void
+	{
+		$track = Track::factory()->uploaded()->create([
+			'artist' => null,
+			'title' => null,
+		]);
 
-        $this->assertEquals("Unknown Artist - Unknown Title", $track->caption);
-    }
+		$this->assertEquals('Unknown Artist - Unknown Title', $track->caption);
+	}
 
-    public function testPathHasUniqueConstraint(): void
-    {
-        $file = TestFiles::all()->first();
+	public function testPathHasUniqueConstraint(): void
+	{
+		$file = TestFiles::all()->first();
 
-        Track::factory()->uploaded(dst: $file)->create();
+		Track::factory()->uploaded(dst: $file)->create();
 
-        $this->expectException(UniqueConstraintViolationException::class);
+		$this->expectException(UniqueConstraintViolationException::class);
 
-        Track::factory()->uploaded(dst: $file)->create();
-    }
+		Track::factory()->uploaded(dst: $file)->create();
+	}
 
-    public function testHashHasUniqueConstraint(): void
-    {
-        $file = TestFiles::all()->first();
+	public function testHashHasUniqueConstraint(): void
+	{
+		$file = TestFiles::all()->first();
 
-        Track::factory()->uploaded(src: $file)->create();
+		Track::factory()->uploaded(src: $file)->create();
 
-        $this->expectException(UniqueConstraintViolationException::class);
+		$this->expectException(UniqueConstraintViolationException::class);
 
-        Track::factory()->uploaded(src: $file)->create();
-    }
+		Track::factory()->uploaded(src: $file)->create();
+	}
 
-    public function testAdminLink(): void
-    {
-        
-    }
+	public function testAdminLink(): void {}
 }

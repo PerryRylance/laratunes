@@ -8,14 +8,14 @@ use Tests\TestCase;
 
 class PasswordConfirmationTest extends TestCase
 {
-    use RefreshDatabase;
+	use RefreshDatabase;
 
-    public function test_confirm_password_screen_can_be_rendered(): void
-    {
-        $user = User::factory()->create();
+	public function test_confirm_password_screen_can_be_rendered(): void
+	{
+		$user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get(route('password.confirm'));
+		$response = $this->actingAs($user)->get(route('password.confirm'));
 
-        $response->assertStatus(200);
-    }
+		$response->assertStatus(200);
+	}
 }

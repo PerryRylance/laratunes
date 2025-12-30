@@ -8,17 +8,17 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class TrackHasDuplicates extends Pivot
 {
-    use CanGetTableNameStatically;
+	use CanGetTableNameStatically;
 
-    protected $table = 'track_has_duplicates';
+	protected $table = 'track_has_duplicates';
 
-    public function original(): BelongsTo
-    {
-        return $this->belongsTo(Track::class, ownerKey: 'original_id');
-    }
+	public function original(): BelongsTo
+	{
+		return $this->belongsTo(Track::class, ownerKey: 'original_id');
+	}
 
-    public function duplicate(): BelongsTo
-    {
-        return $this->belongsTo(Track::class, ownerKey: 'duplicate_id');
-    }
+	public function duplicate(): BelongsTo
+	{
+		return $this->belongsTo(Track::class, ownerKey: 'duplicate_id');
+	}
 }

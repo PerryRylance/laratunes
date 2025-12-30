@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Facade;
 
 class Fifo extends Facade
 {
-    // public static function fake(): void
-    // {
-    //     static::swap(new \Tests\Mocks\Fifo);
-    // }
+	// public static function fake(): void
+	// {
+	//     static::swap(new \Tests\Mocks\Fifo);
+	// }
 
-    protected static function getFacadeAccessor()
-    {
-        return FifoService::class;
-    }
+	protected static function getFacadeAccessor()
+	{
+		return FifoService::class;
+	}
 }

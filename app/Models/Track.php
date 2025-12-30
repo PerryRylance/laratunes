@@ -2,38 +2,34 @@
 
 namespace App\Models;
 
-use App\Facades\Olaf;
 use App\Observers\TrackObserver;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use InvalidArgumentException;
 use Kiwilan\Audio\Audio;
-use Throwable;
 
 #[ObservedBy([TrackObserver::class])]
 class Track extends Model
 {
-    /** @use HasFactory<\Database\Factories\TrackFactory> */
-    use HasFactory;
+	/** @use HasFactory<\Database\Factories\TrackFactory> */
+	use HasFactory;
 
 	const SUPPORTED_EXTENSIONS = [
 		'mp3',
 		'ogg',
-		'flac'
+		'flac',
 	];
 
 	protected $attributes = [
-		'plays' => 0
+		'plays' => 0,
 	];
 
 	protected $fillable = [
@@ -42,17 +38,17 @@ class Track extends Model
 		'path',
 		'hash',
 		'plays',
-		'last_played_at'
+		'last_played_at',
 	];
 
 	public static function createFromFile(string $relative): Track
 	{
 		$path = Storage::disk('media')->path($relative);
 
-		if(!file_exists($path))
+		if (! file_exists($path))
 			throw new InvalidArgumentException("File does not exist '$path'");
 
-		if(!is_file($path))
+		if (! is_file($path))
 			throw new InvalidArgumentException("'$path' is not a file");
 
 		$hash = md5(file_get_contents($path));
@@ -63,7 +59,7 @@ class Track extends Model
 			'path' => $relative,
 			'hash' => $hash,
 			'artist' => $audio->getArtist(),
-			'title' => $audio->getTitle()
+			'title' => $audio->getTitle(),
 		]);
 
 		return $track;
@@ -74,7 +70,7 @@ class Track extends Model
 		$track = Track::orderBy('plays')->inRandomOrder()->firstOrFail();
 
 		$track->increment('plays', 1, [
-			'last_played_at' => Carbon::now()
+			'last_played_at' => Carbon::now(),
 		]);
 
 		return $track;
@@ -108,7 +104,7 @@ class Track extends Model
 	public function hasDuplicates(Builder $query): void
 	{
 		$query
-			->whereIn('id', fn($query) => $query
+			->whereIn('id', fn ($query) => $query
 				->select('original_id')
 				->from(TrackHasDuplicates::getTableName())
 			);
@@ -118,7 +114,7 @@ class Track extends Model
 	public function hasOriginals(Builder $query): void
 	{
 		$query
-			->whereIn('id', fn($query) => $query
+			->whereIn('id', fn ($query) => $query
 				->select('duplicate_id')
 				->from(TrackHasDuplicates::getTableName())
 			);
@@ -128,23 +124,23 @@ class Track extends Model
 	{
 		// TODO: I think we can just use diffForHumans - Jippity gave me this snippet
 		return new Attribute(
-			get: fn () => CarbonInterval::seconds( Carbon::parse($this->last_played_at)->diffInSeconds( Carbon::now() ) )->cascade()->forHumans() . ' ago',
+			get: fn () => CarbonInterval::seconds(Carbon::parse($this->last_played_at)->diffInSeconds(Carbon::now()))->cascade()->forHumans().' ago',
 		);
 	}
 
 	protected function caption(): Attribute
 	{
-		$artist = "Unknown Artist";
-        $title = "Unknown Title";
+		$artist = 'Unknown Artist';
+		$title = 'Unknown Title';
 
-        if(!empty($this->artist))
-            $artist = $this->artist;
+		if (! empty($this->artist))
+			$artist = $this->artist;
 
-        if(!empty($this->title))
-            $title = $this->title;
+		if (! empty($this->title))
+			$title = $this->title;
 
 		return new Attribute(
-			get: fn() => $artist . ' - ' . $title
+			get: fn () => $artist.' - '.$title
 		);
 	}
 

@@ -17,88 +17,91 @@ use Livewire\Component;
 #[Layout('components.layouts.auth')]
 class Login extends Component
 {
-    #[Validate('required|string|email')]
-    public string $email = '';
+	#[Validate('required|string|email')]
+	public string $email = '';
 
-    #[Validate('required|string')]
-    public string $password = '';
+	#[Validate('required|string')]
+	public string $password = '';
 
-    public bool $remember = false;
+	public bool $remember = false;
 
-    /**
-     * Handle an incoming authentication request.
-     */
-    public function login(): void
-    {
-        $this->validate();
+	/**
+	 * Handle an incoming authentication request.
+	 */
+	public function login(): void
+	{
+		$this->validate();
 
-        $this->ensureIsNotRateLimited();
+		$this->ensureIsNotRateLimited();
 
-        $user = $this->validateCredentials();
+		$user = $this->validateCredentials();
 
-        if (Features::canManageTwoFactorAuthentication() && $user->hasEnabledTwoFactorAuthentication()) {
-            Session::put([
-                'login.id' => $user->getKey(),
-                'login.remember' => $this->remember,
-            ]);
+		if (Features::canManageTwoFactorAuthentication() && $user->hasEnabledTwoFactorAuthentication())
+		{
+			Session::put([
+				'login.id' => $user->getKey(),
+				'login.remember' => $this->remember,
+			]);
 
-            $this->redirect(route('two-factor.login'), navigate: true);
+			$this->redirect(route('two-factor.login'), navigate: true);
 
-            return;
-        }
+			return;
+		}
 
-        Auth::login($user, $this->remember);
+		Auth::login($user, $this->remember);
 
-        RateLimiter::clear($this->throttleKey());
-        Session::regenerate();
+		RateLimiter::clear($this->throttleKey());
+		Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
-    }
+		$this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+	}
 
-    /**
-     * Validate the user's credentials.
-     */
-    protected function validateCredentials(): User
-    {
-        $user = Auth::getProvider()->retrieveByCredentials(['email' => $this->email, 'password' => $this->password]);
+	/**
+	 * Validate the user's credentials.
+	 */
+	protected function validateCredentials(): User
+	{
+		$user = Auth::getProvider()->retrieveByCredentials(['email' => $this->email, 'password' => $this->password]);
 
-        if (! $user || ! Auth::getProvider()->validateCredentials($user, ['password' => $this->password])) {
-            RateLimiter::hit($this->throttleKey());
+		if (! $user || ! Auth::getProvider()->validateCredentials($user, ['password' => $this->password]))
+		{
+			RateLimiter::hit($this->throttleKey());
 
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
-        }
+			throw ValidationException::withMessages([
+				'email' => __('auth.failed'),
+			]);
+		}
 
-        return $user;
-    }
+		return $user;
+	}
 
-    /**
-     * Ensure the authentication request is not rate limited.
-     */
-    protected function ensureIsNotRateLimited(): void
-    {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-            return;
-        }
+	/**
+	 * Ensure the authentication request is not rate limited.
+	 */
+	protected function ensureIsNotRateLimited(): void
+	{
+		if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5))
+		{
+			return;
+		}
 
-        event(new Lockout(request()));
+		event(new Lockout(request()));
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+		$seconds = RateLimiter::availableIn($this->throttleKey());
 
-        throw ValidationException::withMessages([
-            'email' => __('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
-        ]);
-    }
+		throw ValidationException::withMessages([
+			'email' => __('auth.throttle', [
+				'seconds' => $seconds,
+				'minutes' => ceil($seconds / 60),
+			]),
+		]);
+	}
 
-    /**
-     * Get the authentication rate limiting throttle key.
-     */
-    protected function throttleKey(): string
-    {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
-    }
+	/**
+	 * Get the authentication rate limiting throttle key.
+	 */
+	protected function throttleKey(): string
+	{
+		return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+	}
 }

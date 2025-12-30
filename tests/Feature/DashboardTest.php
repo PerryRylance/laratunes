@@ -8,17 +8,17 @@ use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
-    use RefreshDatabase;
+	use RefreshDatabase;
 
-    public function testGuestsAreRedirectedToTheLoginPage(): void
-    {
-        $this->get('/dashboard')->assertRedirect('/login');
-    }
+	public function testGuestsAreRedirectedToTheLoginPage(): void
+	{
+		$this->get('/dashboard')->assertRedirect('/login');
+	}
 
-    public function testAuthenticatedUsersCanVisitTheDashboard(): void
-    {
-        $this->actingAs($user = User::factory()->create());
+	public function testAuthenticatedUsersCanVisitTheDashboard(): void
+	{
+		$this->actingAs($user = User::factory()->create());
 
-        $this->get('/dashboard')->assertStatus(200);
-    }
+		$this->get('/dashboard')->assertStatus(200);
+	}
 }

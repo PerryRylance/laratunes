@@ -7,167 +7,156 @@ use App\Services\BufferService;
 use DateTime;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Redis;
-use LogicException;
 use Mockery;
-use Symfony\Component\Console\Output\BufferedOutput;
 use Tests\TestCase;
 use UnexpectedValueException;
 
 class MonitorTest extends TestCase
 {
-    private function runCommand(): void
-    {
-        Artisan::call('app:monitor', [
-            '--once' => true
-        ]);
-    }
+	private function runCommand(): void
+	{
+		Artisan::call('app:monitor', [
+			'--once' => true,
+		]);
+	}
 
-    private function filterCommandsByKey(string $key, array $commands): array
-    {
-        return array_values( array_filter($commands, fn($command) => $command[1] === $key) );
-    }
+	private function filterCommandsByKey(string $key, array $commands): array
+	{
+		return array_values(array_filter($commands, fn ($command) => $command[1] === $key));
+	}
 
-    private function assertMetricHistory(string $key, callable $assertValue): void
-    {
-        $commands = [];
+	private function assertMetricHistory(string $key, callable $assertValue): void
+	{
+		$commands = [];
 
-        // NB: Mock this out because Redis is used as a store for ffmpeg bitrates
-        Redis::shouldReceive('get')->andReturnUsing(function($key) {
-            switch($key)
-            {
-                case 'monitor:bitrate:transmitter':
-                    return 1000;
+		// NB: Mock this out because Redis is used as a store for ffmpeg bitrates
+		Redis::shouldReceive('get')->andReturnUsing(function ($key) {
+			switch ($key)
+			{
+				case 'monitor:bitrate:transmitter':
+					return 1000;
 
-                default:
-                    throw new UnexpectedValueException();
-            }
-        });
+				default:
+					throw new UnexpectedValueException();
+			}
+		});
 
-        // NB: Mock this out for the updated_at just so there is a method there, even though we test this separately
-        Redis::shouldReceive('set');
+		// NB: Mock this out for the updated_at just so there is a method there, even though we test this separately
+		Redis::shouldReceive('set');
 
-        Redis::shouldReceive('pipeline')
-            ->andReturnUsing(function($callback) use (&$commands) {
+		Redis::shouldReceive('pipeline')
+			->andReturnUsing(function ($callback) use (&$commands) {
 
-                $mockPipe = Mockery::mock();
+				$mockPipe = Mockery::mock();
 
-                foreach(['lpush', 'ltrim'] as $verb)
-                    $mockPipe
-                        ->shouldReceive($verb)
-                        ->once()
-                        ->andReturnUsing(function($key, ...$args) use (&$commands, $verb) {
-                            $commands []= [$verb, $key, $args];
-                        });
+				foreach (['lpush', 'ltrim'] as $verb)
+					$mockPipe
+						->shouldReceive($verb)
+						->once()
+						->andReturnUsing(function ($key, ...$args) use (&$commands, $verb) {
+							$commands[] = [$verb, $key, $args];
+						});
 
-                $callback($mockPipe);
+				$callback($mockPipe);
 
-            });
+			});
 
-        $this->runCommand();
+		$this->runCommand();
 
-        $commands = $this->filterCommandsByKey($key, $commands);
+		$commands = $this->filterCommandsByKey($key, $commands);
 
-        $this->assertCount(2, $commands);
+		$this->assertCount(2, $commands);
 
-        $this->assertEquals($commands[0][0], 'lpush');
-        $this->assertEquals($commands[0][1], $key);
-        
-        $assertValue($commands[0][2][0]);
+		$this->assertEquals($commands[0][0], 'lpush');
+		$this->assertEquals($commands[0][1], $key);
 
-        $this->assertEquals($commands[1][0], 'ltrim');
-        $this->assertEquals($commands[1][1], $key);
-        $this->assertEquals($commands[1][2], [0, 29]);
-    }
+		$assertValue($commands[0][2][0]);
 
-    public function testCpuUsage(): void
-    {
-        $this->assertMetricHistory('monitor:cpu', function($percent) {
+		$this->assertEquals($commands[1][0], 'ltrim');
+		$this->assertEquals($commands[1][1], $key);
+		$this->assertEquals($commands[1][2], [0, 29]);
+	}
 
-            $this->assertIsFloat($percent);
-            $this->assertGreaterThanOrEqual(0, $percent);
-            $this->assertLessThanOrEqual(100, $percent);
+	public function testCpuUsage(): void
+	{
+		$this->assertMetricHistory('monitor:cpu', function ($percent) {
 
-        });
-    }
+			$this->assertIsFloat($percent);
+			$this->assertGreaterThanOrEqual(0, $percent);
+			$this->assertLessThanOrEqual(100, $percent);
 
-    public function testMemoryUsage(): void
-    {
-        $this->assertMetricHistory('monitor:memory', function($usage) {
+		});
+	}
 
-            $this->assertIsFloat($usage);
-            $this->assertGreaterThan(0, $usage);
+	public function testMemoryUsage(): void
+	{
+		$this->assertMetricHistory('monitor:memory', function ($usage) {
 
-        });
-    }
+			$this->assertIsFloat($usage);
+			$this->assertGreaterThan(0, $usage);
 
-    public function testFifoBytesAvailable(): void
-    {
-        unlink(BufferService::NOW_PLAYING_BUFFER_PATH);
+		});
+	}
 
-        if(posix_mkfifo(BufferService::NOW_PLAYING_BUFFER_PATH, 0666) === false)
-            $this->fail(posix_strerror(posix_get_last_error()));
+	public function testFifoBytesAvailable(): void
+	{
+		unlink(BufferService::NOW_PLAYING_BUFFER_PATH);
 
-        $fh = fopen(BufferService::NOW_PLAYING_BUFFER_PATH, 'w+');
+		if (posix_mkfifo(BufferService::NOW_PLAYING_BUFFER_PATH, 0666) === false)
+			$this->fail(posix_strerror(posix_get_last_error()));
 
-        if($fh === false)
-            $this->fail('Failed to open file');
+		$fh = fopen(BufferService::NOW_PLAYING_BUFFER_PATH, 'w+');
 
-        stream_set_blocking($fh, false);
-        fwrite($fh, 'test');
+		if ($fh === false)
+			$this->fail('Failed to open file');
 
-        $this->assertMetricHistory('monitor:buffer', fn($bytes) => $this->assertEquals(4, $bytes));
-    }
+		stream_set_blocking($fh, false);
+		fwrite($fh, 'test');
 
-    public function testUpdatedAt(): void
-    {
-        Redis::shouldReceive('pipeline');
-        Redis::shouldReceive('get');
+		$this->assertMetricHistory('monitor:buffer', fn ($bytes) => $this->assertEquals(4, $bytes));
+	}
 
-        Redis::shouldReceive('set')
-            ->andReturnUsing(function($key, $value) {
+	public function testUpdatedAt(): void
+	{
+		Redis::shouldReceive('pipeline');
+		Redis::shouldReceive('get');
 
-                if($key === 'monitor:memory_total')
-                    return 16384.0;
+		Redis::shouldReceive('set')
+			->andReturnUsing(function ($key, $value) {
 
-                $this->assertEquals($key, 'monitor:updated_at');
+				if ($key === 'monitor:memory_total')
+					return 16384.0;
 
-                $updatedAt = DateTime::createFromFormat(DateTime::ATOM, $value);
-                $now = new DateTime;
+				$this->assertEquals($key, 'monitor:updated_at');
 
-                $diff = $now->getTimestamp() - $updatedAt->getTimestamp();
+				$updatedAt = DateTime::createFromFormat(DateTime::ATOM, $value);
+				$now = new DateTime;
 
-                $this->assertLessThanOrEqual(3, $diff);
-                
-            });
+				$diff = $now->getTimestamp() - $updatedAt->getTimestamp();
 
-        $this->runCommand();
-    }
+				$this->assertLessThanOrEqual(3, $diff);
 
-    public function testHistoryDoesntExceedLimit(): void
-    {
-        for($i = 0; $i < 31; $i++)
-            $this->runCommand();
+			});
 
-        foreach([
-            'monitor:cpu',
-            'monitor:memory',
-            'monitor:buffer'
-        ] as $key)
-            $this->assertCount(30, Monitor::list($key));
-    }
+		$this->runCommand();
+	}
 
-    public function testNotifyOnHighCpu(): void
-    {
+	public function testHistoryDoesntExceedLimit(): void
+	{
+		for ($i = 0; $i < 31; $i++)
+			$this->runCommand();
 
-    }
+		foreach ([
+			'monitor:cpu',
+			'monitor:memory',
+			'monitor:buffer',
+		] as $key)
+			$this->assertCount(30, Monitor::list($key));
+	}
 
-    public function testNotifyOnHighMemory(): void
-    {
+	public function testNotifyOnHighCpu(): void {}
 
-    }
+	public function testNotifyOnHighMemory(): void {}
 
-    public function testNotifyOnBufferUnderrun(): void
-    {
-
-    }
+	public function testNotifyOnBufferUnderrun(): void {}
 }

@@ -16,7 +16,7 @@ class WorkingDirectory
 	public static function pop(): string
 	{
 		if (empty(static::$stack))
-			throw new \Exception("Directory stack is empty");
+			throw new \Exception('Directory stack is empty');
 
 		$dir = array_pop(static::$stack);
 

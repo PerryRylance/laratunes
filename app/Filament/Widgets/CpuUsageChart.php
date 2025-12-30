@@ -6,24 +6,25 @@ use App\Facades\Monitor;
 
 class CpuUsageChart extends MonitorChart
 {
-    protected ?string $heading = 'CPU Usage';
-    protected static ?int $sort = 1;
+	protected ?string $heading = 'CPU Usage';
 
-    protected function getData(): array
-    {
-        return [
-            ...parent::getData(),
-            'datasets' => [
-                [
-                    'label' => '%',
-                    'data' => Monitor::list('monitor:cpu'),
-                ],
-            ],
-        ];
-    }
+	protected static ?int $sort = 1;
 
-    protected function getMaximum(): int|float|null
-    {
-        return 100;
-    }
+	protected function getData(): array
+	{
+		return [
+			...parent::getData(),
+			'datasets' => [
+				[
+					'label' => '%',
+					'data' => Monitor::list('monitor:cpu'),
+				],
+			],
+		];
+	}
+
+	protected function getMaximum(): int|float|null
+	{
+		return 100;
+	}
 }
