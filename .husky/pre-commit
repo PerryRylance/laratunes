@@ -1,9 +1,15 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+STAGED_FILES=$(git diff --name-only --cached --diff-filter=AM | grep '.php$')
+
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
 # Run your custom Stout formatting script via Sail
 ./vendor/bin/sail up -d
-./vendor/bin/sail composer run format
+./vendor/bin/sail composer run format -- $STAGED_FILES
 
 # Re-add the files to the commit if Stout modified them
-git add .
+git add $STAGED_FILES
