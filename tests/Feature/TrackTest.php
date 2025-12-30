@@ -481,12 +481,20 @@ class TrackTest extends AdminTestCase
 
         $original->duplicates()->attach($duplicate);
 
-        $records = Livewire::test(ListTracks::class)
+        $page = Livewire::test(ListTracks::class);
+
+        $records = $page
             ->toggleAllTableColumns()
             ->instance()
             ->getTableRecords();
 
-        $this->assertEquals(1, $records[0]->duplicates_count);
+        $recordWithCount = $records[0];
+
+        $page->assertTableColumnFormattedStateSet(
+            'duplicates_count',
+            1,
+            $recordWithCount
+        );
     }
 
     public function testCanSeeOriginalsCountInTable(): void
@@ -495,22 +503,54 @@ class TrackTest extends AdminTestCase
 
         $original->duplicates()->attach($duplicate);
 
-        $records = Livewire::test(ListTracks::class)
+        $page = Livewire::test(ListTracks::class);
+
+        $records = $page
             ->toggleAllTableColumns()
             ->instance()
             ->getTableRecords();
 
-        $this->assertEquals(1, $records[1]->originals_count);
+        $recordWithCount = $records[1];
+
+        $page->assertTableColumnFormattedStateSet(
+            'originals_count',
+            1,
+            $recordWithCount
+        );
     }
 
     public function testCanSortByDuplicateCount(): void
     {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
 
+        $original->duplicates()->attach($duplicate);
+
+        $asc = [$duplicate, $original];
+        $desc = [$original, $duplicate];
+
+        Livewire::test(ListTracks::class)
+            ->toggleAllTableColumns()
+            ->sortTable('duplicates_count')
+            ->assertCanSeeTableRecords($asc, inOrder: true)
+            ->sortTable('duplicates_count', 'desc')
+            ->assertCanSeeTableRecords($desc, inOrder: true);
     }
 
     public function testCanSortByOriginalsCount(): void
     {
+        [$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
 
+        $original->duplicates()->attach($duplicate);
+
+        $asc = [$original, $duplicate];
+        $desc = [$duplicate, $original];
+
+        Livewire::test(ListTracks::class)
+            ->toggleAllTableColumns()
+            ->sortTable('originals_count')
+            ->assertCanSeeTableRecords($asc, inOrder: true)
+            ->sortTable('originals_count', 'desc')
+            ->assertCanSeeTableRecords($desc, inOrder: true);
     }
 
     public function testCanFilterByHasDuplicates(): void
