@@ -555,12 +555,30 @@ class TrackTest extends AdminTestCase
 
     public function testCanFilterByHasDuplicates(): void
     {
+        [$original, $duplicate] = $records = Track::factory()->uploaded()->count(2)->create();
 
+        $original->duplicates()->attach($duplicate);
+
+        Livewire::test(ListTracks::class)
+            ->assertCanSeeTableRecords($records)
+            ->assertTableFilterExists('has_duplicates')
+            ->filterTable('has_duplicates')
+            ->assertCanSeeTableRecords([$original])
+            ->assertCanNotSeeTableRecords([$duplicate]);
     }
 
     public function testCanFilterByHasOriginals(): void
     {
+        [$original, $duplicate] = $records = Track::factory()->uploaded()->count(2)->create();
 
+        $original->duplicates()->attach($duplicate);
+
+        Livewire::test(ListTracks::class)
+            ->assertCanSeeTableRecords($records)
+            ->assertTableFilterExists('has_originals')
+            ->filterTable('has_originals')
+            ->assertCanSeeTableRecords([$duplicate])
+            ->assertCanNotSeeTableRecords([$original]);
     }
 
     public function testCanAttachDuplicatesManually(): void

@@ -7,7 +7,9 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TracksTable
 {
@@ -47,7 +49,10 @@ class TracksTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('has_duplicates')
+                    ->query(fn(Builder $query): Builder => $query->hasDuplicates()),
+                Filter::make('has_originals')
+                    ->query(fn(Builder $query): Builder => $query->hasOriginals()),
             ])
             ->recordActions([
                 ViewAction::make(),

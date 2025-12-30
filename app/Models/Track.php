@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use InvalidArgumentException;
 use Kiwilan\Audio\Audio;
 use Throwable;
@@ -94,12 +95,33 @@ class Track extends Model
 		return $this->belongsToMany(Track::class, 'track_has_duplicates', 'duplicate_id', 'original_id');
 	}
 
-	public function scopeMostRecentlyPlayed(Builder $query)
+	#[Scope]
+	public function mostRecentlyPlayed(Builder $query): void
 	{
 		$query
 			->whereNotNull('last_played_at')
 			->orderBy('last_played_at', 'DESC')
 			->limit(10);
+	}
+
+	#[Scope]
+	public function hasDuplicates(Builder $query): void
+	{
+		$query
+			->whereIn('id', fn($query) => $query
+				->select('original_id')
+				->from(TrackHasDuplicates::getTableName())
+			);
+	}
+
+	#[Scope]
+	public function hasOriginals(Builder $query): void
+	{
+		$query
+			->whereIn('id', fn($query) => $query
+				->select('duplicate_id')
+				->from(TrackHasDuplicates::getTableName())
+			);
 	}
 
 	protected function lastPlayedForHumans(): Attribute
