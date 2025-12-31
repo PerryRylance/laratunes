@@ -1,0 +1,48 @@
+services:
+  laravel:
+    image: dunglas/frankenphp
+    build:
+      context: ./docker/8.4
+      dockerfile: Dockerfile.production
+    environment:
+      - USER_ID=${WWWUSER:-1000}
+      - GROUP_ID=${WWWGROUP:-1000}
+      - SERVER_NAME=${APP_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+      - "443:443/udp" # HTTP/3
+    volumes:
+      - ./:/app
+      - ${MEDIA_PATH}:/mnt/media
+      - caddy_data:/data
+      - caddy_config:/config
+      - laratunes-sqlite:/sqlite
+  olaf:
+    extends:
+      file: compose.yaml
+      service: olaf
+    volumes:
+      - ${MEDIA_PATH}:/root/audio
+    restart: unless-stopped
+  redis:
+    extends:
+      file: compose.yaml
+      service: redis
+    restart: unless-stopped
+networks:
+  laratunes:
+    driver: bridge
+volumes:
+  laratunes-redis:
+    driver: local
+  laratunes-sqlite:
+  caddy_data:
+  caddy_config:

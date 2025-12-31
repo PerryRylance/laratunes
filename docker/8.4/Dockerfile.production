@@ -1,0 +1,25 @@
+FROM dunglas/frankenphp
+
+USER root
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" || true
+
+RUN useradd -m ${USER} || true
+
+ARG USER=1000
+
+RUN \
+	# Use "adduser -D ${USER}" for alpine based distros
+	useradd ${USER}; \
+	# Add additional capability to bind to port 80 and 443
+	setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp; \
+	# Give write access to /config/caddy and /data/caddy
+	chown -R ${USER}:${USER} /config/caddy /data/caddy
+
+RUN \
+	# Install Composer packages
+	cd /app/public \
+	composer install --no-dev --optimize-autoloader \
+	# Install NPM packages and build
+	npm install \
+	npm run build

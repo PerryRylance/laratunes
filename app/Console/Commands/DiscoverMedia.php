@@ -92,6 +92,6 @@ class DiscoverMedia extends Command
 		if ($numTracks === 0)
 			return $this->error('There are no tracks in the library');
 
-		$this->info("Discovered $numTracksDiscovered new tracks, new total is $numTracks");
+		$this->info(PHP_EOL."Discovered $numTracksDiscovered new tracks, new total is $numTracks");
 	}
 }

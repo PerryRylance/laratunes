@@ -21,6 +21,10 @@ Laratunes is an open source streaming radio, RTMP client and web interface.
     - Make sure that your system can be reached on port 443,
     - Or, alternatively you can use a CloudFlare tunnel
 
+### Setup
+- Clone this repository `git clone https://github.com/PerryRylance/laratunes && cd laratunes`
+- Run `./install.sh` and follow the instructions
+
 ### Via port 443
 > TODO: Write up documentation here, Caddy / FrankenPHP should take care of everything
 
