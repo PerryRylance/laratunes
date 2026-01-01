@@ -25,6 +25,14 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - laratunes-sqlite:/sqlite
+  supervisor:
+    image: php:8.4-cli
+    command: ["php", "artisan", "queue:work"]
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+      - ${MEDIA_PATH}:/mnt/media
+      - laratunes-sqlite:/sqlite
   olaf:
     extends:
       file: compose.yaml

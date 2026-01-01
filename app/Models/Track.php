@@ -158,4 +158,9 @@ class Track extends Model
 			get: fn () => $this->votes()->whereType('down')->count()
 		);
 	}
+
+	public function isFileMissing(): bool
+	{
+		return ! Storage::disk('media')->exists($this->path);
+	}
 }

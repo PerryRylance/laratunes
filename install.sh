@@ -110,10 +110,22 @@ docker compose exec laravel php artisan migrate --force
 # Prompt the user to set up their admin account
 echo "🔑 Creating admin account..."
 
-docker compose exec -it laravel php artisan make:filament-user
+docker compose exec -it laravel php artisan app:make-admin-user
 
-# TODO: Ask the user if they'd rather do this asynchronously
+# Open the login link in the browser
+URL="${domain}/admin/login"
 
-echo "🕵️  Discovering media..."
+if command -v open >/dev/null; then
+    OPENER="open"
+elif command -v xdg-open >/dev/null; then
+    OPENER="xdg-open"
+else
+    OPENER=""
+fi
 
-docker compose exec -it laravel php artisan app:sync-media
+# Use it
+if [ -n "$OPENER" ]; then
+    $OPENER "$URL"
+fi
+
+echo -e "Please navigate to \e]8;;$URL\e\\$URL\e]8;;\e\\ to complete setup."

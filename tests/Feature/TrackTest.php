@@ -8,6 +8,7 @@ use App\Filament\Resources\Tracks\Pages\ListTracks;
 use App\Filament\Resources\Tracks\Pages\ViewTrack;
 use App\Filament\Resources\Tracks\RelationManagers\DuplicatesRelationManager;
 use App\Filament\Resources\Tracks\RelationManagers\OriginalsRelationManager;
+use App\Filament\Widgets\FileMissingCallout;
 use App\Models\Track;
 use App\Models\TrackHasDuplicates;
 use App\Models\User;
@@ -686,5 +687,29 @@ class TrackTest extends AdminTestCase
 			'original_id' => $original->id,
 			'duplicate_id' => $duplicate->id,
 		]);
+	}
+
+	public function testSeeFileMissingCalloutOnView(): void
+	{
+		$track = Track::factory()->uploaded()->create();
+
+		Storage::disk('media')->delete($track->path);
+
+		Livewire::test(ViewTrack::class, [
+			'record' => $track->id,
+		])
+			->assertOk()
+			->assertSeeLivewire(FileMissingCallout::class);
+	}
+
+	public function testDontSeeFileMissingCalloutOnViewWhenFileExists(): void
+	{
+		$track = Track::factory()->uploaded()->create();
+
+		Livewire::test(ViewTrack::class, [
+			'record' => $track->id,
+		])
+			->assertOk()
+			->assertDontSeeLivewire(FileMissingCallout::class);
 	}
 }
