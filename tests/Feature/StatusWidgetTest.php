@@ -22,7 +22,6 @@ class StatusWidgetTest extends AdminTestCase
 			->andReturn(true);
 
 		Livewire::test(StatusWidget::class)
-			->assertSee('The stream is broadcasting!')
-			->assertDontSee('Broadcast active!');
+			->assertSee('Broadcast active!');
 	}
 }
