@@ -12,7 +12,7 @@ class StatusWidgetTest extends AdminTestCase
 	public function testCanSeeNotPlayingStatus(): void
 	{
 		Livewire::test(StatusWidget::class)
-			->assertSee('The stream is not broadcasting presently.')
+			->assertSee('Broadcast inactive')
 			->assertSee('Start Broadcast');
 	}
 
@@ -23,6 +23,6 @@ class StatusWidgetTest extends AdminTestCase
 
 		Livewire::test(StatusWidget::class)
 			->assertSee('The stream is broadcasting!')
-			->assertDontSee('Start Broadcast');
+			->assertDontSee('Broadcast active!');
 	}
 }
