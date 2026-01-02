@@ -4,22 +4,26 @@ namespace App\Filament\Widgets;
 
 use App\Facades\Transmission;
 use App\Filament\Pages\Dashboard;
+use App\Models\Track;
 use Filament\Widgets\Widget;
+use Illuminate\View\View;
 
 class StatusWidget extends Widget
 {
 	public bool $transmitting;
 
+	public bool $isConfigured;
+
+	public int $hasTracks;
+
+	// TOOD: Don't think this is needed?
 	protected string $view = 'filament.widgets.status-widget';
 
 	protected static ?int $sort = 0;
 
 	protected int|string|array $columnSpan = 'full';
 
-	public function __construct()
-	{
-		$this->transmitting = Transmission::running();
-	}
+	protected static bool $isLazy = false;
 
 	public function broadcast()
 	{
@@ -35,5 +39,14 @@ class StatusWidget extends Widget
 		// TODO: Test out some popular scenarios like connection rejected
 
 		return redirect()->to(Dashboard::getUrl());
+	}
+
+	public function render(): View
+	{
+		$this->hasTracks = Track::exists();
+		$this->isConfigured = false;
+		$this->transmitting = Transmission::running();
+
+		return parent::render();
 	}
 }

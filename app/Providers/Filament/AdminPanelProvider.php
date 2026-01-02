@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Widgets\BufferUsageChart;
 use App\Filament\Widgets\CpuUsageChart;
+use App\Filament\Widgets\DiscoverMediaCallout;
 use App\Filament\Widgets\MemoryUsageChart;
 use App\Filament\Widgets\StatusWidget;
 use App\Filament\Widgets\TransmissionBitrateChart;
@@ -25,6 +26,20 @@ class AdminPanelProvider extends PanelProvider
 {
 	public function panel(Panel $panel): Panel
 	{
+		$charts = [
+			CpuUsageChart::class,
+			TransmissionBitrateChart::class,
+			BufferUsageChart::class,
+			MemoryUsageChart::class,
+		];
+
+		$widgets = [
+			DiscoverMediaCallout::class,
+		];
+
+		// TODO: Conditions - can't start stream with no tracks and missing settings
+		$widgets[] = StatusWidget::class;
+
 		return $panel
 			->default()
 			->id('admin')
@@ -38,11 +53,8 @@ class AdminPanelProvider extends PanelProvider
 			->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
 			->pages([])
 			->widgets([
-				StatusWidget::class,
-				CpuUsageChart::class,
-				TransmissionBitrateChart::class,
-				BufferUsageChart::class,
-				MemoryUsageChart::class,
+				...$widgets,
+				...$charts,
 			])
 			->brandLogo(fn () => view('filament.logo'))
 			->middleware([

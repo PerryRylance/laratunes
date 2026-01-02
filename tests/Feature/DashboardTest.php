@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\Dashboard;
+use App\Filament\Widgets\DiscoverMediaCallout;
 use App\Filament\Widgets\FileMissingCallout;
+use App\Jobs\CreateTrackJob;
+use App\Models\Track;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -33,13 +36,41 @@ class DashboardTest extends TestCase
 			->assertDontSeeLivewire(FileMissingCallout::class);
 	}
 
-	public function testSeeDiscoverMediaCalloutWhenNoTracksPresent(): void {}
+	public function testSeeDiscoverMediaCalloutWhenNoTracksPresent(): void
+	{
+		$this->actingAs(User::factory()->admin()->create());
 
-	public function testDontSeeDiscoverMediaCalloutWhenTracksPresent(): void {}
+		Livewire::test(Dashboard::class)
+			->assertSeeLivewire(DiscoverMediaCallout::class)
+			->assertSee('No tracks in library');
+	}
+
+	public function testDiscoverMediaCalloutShowsProgressWhenJobsQueued(): void
+	{
+		$this->actingAs(User::factory()->admin()->create());
+
+		CreateTrackJob::dispatch('test.mp3');
+
+		Livewire::test(Dashboard::class)
+			->assertSeeLivewire(DiscoverMediaCallout::class)
+			->assertSee('Discovery in progress');
+	}
+
+	public function testDontSeeDiscoverMediaCalloutWhenNoJobsQueuedAndTracksPresent(): void
+	{
+		$this->actingAs(User::factory()->admin()->create());
+
+		Track::factory()->uploaded()->create();
+
+		Livewire::test(Dashboard::class)
+			->assertDontSeeLivewire(DiscoverMediaCallout::class);
+	}
 
 	public function testSeeConfigureStreamCalloutWhenSettingsMissing(): void {}
 
 	public function testDontSeeConfigureStreamCalloutWhenSettingsPresent(): void {}
 
-	public function testDontSeeStatusWidgetWhenSettingsMissing(): void {}
+	public function testSeeReasonInStatusWidgetWhenNoTracksPresent(): void {}
+
+	public function testSeeReasonInStatusWidgetWhenSettingsMissing(): void {}
 }

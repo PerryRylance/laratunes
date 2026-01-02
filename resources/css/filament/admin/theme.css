@@ -4,6 +4,8 @@
 @source '../../../../resources/views/filament/**/*';
 
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+
 @import '../../../../vendor/livewire/flux/dist/flux.css';
 
 nav.fi-topbar .fi-logo a
@@ -11,4 +13,11 @@ nav.fi-topbar .fi-logo a
     display: flex;
     align-items: center;
     margin-inline-start: .5rem;
+}
+
+.discover-media-callout-widget section.progress
+{
+    display: flex;
+    align-items: center;
+    gap: 1ch;
 }
