@@ -107,6 +107,10 @@ echo "🦅 Running migrations..."
 
 docker compose exec laravel php artisan migrate --force
 
+echo "⚙️ Initializing default settings..."
+
+docker compose exec laravel php artisan app:create-default-settings
+
 # Prompt the user to set up their admin account
 echo "🔑 Creating admin account..."
 

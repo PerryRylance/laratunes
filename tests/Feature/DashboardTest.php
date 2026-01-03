@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\Dashboard;
+use App\Filament\Widgets\ConfigureStreamCallout;
 use App\Filament\Widgets\DiscoverMediaCallout;
 use App\Filament\Widgets\FileMissingCallout;
 use App\Jobs\CreateTrackJob;
@@ -66,7 +67,13 @@ class DashboardTest extends TestCase
 			->assertDontSeeLivewire(DiscoverMediaCallout::class);
 	}
 
-	public function testSeeConfigureStreamCalloutWhenSettingsMissing(): void {}
+	public function testSeeConfigureStreamCalloutWhenSettingsMissing(): void
+	{
+		$this->actingAs(User::factory()->admin()->create());
+
+		Livewire::test(Dashboard::class)
+			->assertSeeLivewire(ConfigureStreamCallout::class);
+	}
 
 	public function testDontSeeConfigureStreamCalloutWhenSettingsPresent(): void {}
 

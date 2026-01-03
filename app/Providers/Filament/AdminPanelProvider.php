@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Widgets\BufferUsageChart;
+use App\Filament\Widgets\ConfigureStreamCallout;
 use App\Filament\Widgets\CpuUsageChart;
 use App\Filament\Widgets\DiscoverMediaCallout;
 use App\Filament\Widgets\MemoryUsageChart;
@@ -34,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
 		];
 
 		$widgets = [
+			ConfigureStreamCallout::class,
 			DiscoverMediaCallout::class,
 		];
 
