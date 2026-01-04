@@ -1,13 +1,15 @@
 # Laratunes
 Laratunes is an open source streaming radio, RTMP client and web interface.
 
+> ⚠️ If you intend to use this software to broadcast, please ensure that your stream complies with the policies of the platform you stream to and respects the intellectual property rights of the authors who's content you stream.
+
 ## Features
 - Administrative interface for track management
 - Audio fingerprinting for detecting duplicates on upload ~~and for users to find tracks by audio search~~ _(Coming soon!)_
 - Streaming audio and a still image or video loop via RTMP (YouTube)
-- QR code link to track embedded in video
-- Nightbot YouTube chat integration
-- Voting system
+- ~~QR code link to track embedded in video~~ _(Coming soon!)_
+- ~~Nightbot YouTube chat integration~~ _(Coming soon!)_
+- ~~Voting system~~ _(Coming soon!)_
 - Play count based shuffle ~~with weighting for upvoted tracks~~ _(Coming soon!)_
 - ~~User suggested metadata~~ _(Coming soon!)_
 - ~~User song requests~~ _(Coming soon!)_
