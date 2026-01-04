@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Process\FakeInvokedProcess;
 use Illuminate\Process\InvokedProcess;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Redis;
 
 class FfmpegService
 {
-	public static function start(string $name, array $params, int $priority = 0): InvokedProcess
+	public static function start(string $name, array $params, int $priority = 0): InvokedProcess|FakeInvokedProcess
 	{
 		$lower = strtolower($name);
 

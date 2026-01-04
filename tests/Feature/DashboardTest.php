@@ -6,11 +6,14 @@ use App\Filament\Pages\Dashboard;
 use App\Filament\Widgets\ConfigureStreamCallout;
 use App\Filament\Widgets\DiscoverMediaCallout;
 use App\Filament\Widgets\FileMissingCallout;
+use App\Filament\Widgets\StatusWidget;
 use App\Jobs\CreateTrackJob;
+use App\Models\Setting;
 use App\Models\Track;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\TestWith;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -67,17 +70,53 @@ class DashboardTest extends TestCase
 			->assertDontSeeLivewire(DiscoverMediaCallout::class);
 	}
 
-	public function testSeeConfigureStreamCalloutWhenSettingsMissing(): void
+	#[TestWith([Setting::STREAM_URL, 'rtmp://test.stream'], 'url without key')]
+	#[TestWith([Setting::STREAM_KEY, 'a-secret-key'], 'key without url')]
+	public function testSeeConfigureStreamCalloutWhenSettingsMissing(string $key, string $value): void
 	{
-		$this->actingAs(User::factory()->admin()->create());
+		Setting::factory()
+			->defaults()
+			->create();
+
+		Setting::factory()
+			->create([
+				'name' => $key,
+				'value' => $value,
+			]);
 
 		Livewire::test(Dashboard::class)
 			->assertSeeLivewire(ConfigureStreamCallout::class);
 	}
 
-	public function testDontSeeConfigureStreamCalloutWhenSettingsPresent(): void {}
+	public function testDontSeeConfigureStreamCalloutWhenSettingsPresent(): void
+	{
+		Setting::factory()
+			->complete()
+			->create();
 
-	public function testSeeReasonInStatusWidgetWhenNoTracksPresent(): void {}
+		Livewire::test(Dashboard::class)
+			->assertDontSeeLivewire(ConfigureStreamCallout::class);
+	}
 
-	public function testSeeReasonInStatusWidgetWhenSettingsMissing(): void {}
+	public function testSeeReasonInStatusWidgetWhenNoTracksPresent(): void
+	{
+		Setting::factory()
+			->complete()
+			->create();
+
+		Livewire::test(StatusWidget::class)
+			->assertDontSee('The stream is not configured.')
+			->assertSee('There are no tracks in your library.');
+	}
+
+	#[TestWith([Setting::STREAM_URL, 'rtmp://test.stream'], 'url without key')]
+	#[TestWith([Setting::STREAM_KEY, 'a-secret-key'], 'key without url')]
+	public function testSeeReasonInStatusWidgetWhenSettingsMissing(): void
+	{
+		Track::factory()->uploaded()->create();
+
+		Livewire::test(StatusWidget::class)
+			->assertDontSee('There are no tracks in your library.')
+			->assertSee('The stream is not configured.');
+	}
 }

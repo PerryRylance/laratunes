@@ -62,15 +62,19 @@ class Settings extends Page implements HasSchemas
 						'video/webm',
 						'video/x-matroska',
 					]),
-				TextInput::make(Setting::BROADCAST_URL)
-					->label('Broadcast URL')
+				TextInput::make(Setting::STREAM_URL)
+					->label('Stream URL')
 					->url()
 					->rules(fn (): Closure => function (string $attribute, $value, Closure $fail) {
 						if (preg_match('/^rtmp:\/\//i', $value))
 						return;
 
 						$fail('Must be an rtmp:// URL');
-					}),
+					})
+					->required(),
+				TextInput::make(Setting::STREAM_KEY)
+					->label('Stream key')
+					->required(),
 				// TODO: Nightbot API key
 				Action::make('save')
 					->action(fn () => $this->save()),

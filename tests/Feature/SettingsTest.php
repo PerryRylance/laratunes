@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Filament\Pages\Settings;
 use App\Models\Setting;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -18,7 +18,7 @@ class SettingsTest extends TestCase
 		$this->assertEquals(1280, Setting::value(Setting::BROADCAST_VIDEO_WIDTH));
 		$this->assertEquals(720, Setting::value(Setting::BROADCAST_VIDEO_HEIGHT));
 		$this->assertEquals('default-background.png', Setting::value(Setting::BROADCAST_BACKGROUND_PATH));
-		$this->assertEquals('', Setting::value(Setting::BROADCAST_URL));
+		$this->assertEquals('', Setting::value(Setting::STREAM_URL));
 		$this->assertMatchesRegularExpression('/^[0-9a-f]{32}$/', Setting::value(Setting::NIGHTBOT_API_TOKEN));
 	}
 
@@ -26,19 +26,24 @@ class SettingsTest extends TestCase
 	{
 		Artisan::call('app:create-default-settings');
 
-		Setting::value(Setting::BROADCAST_URL, 'rtmp://test.stream');
+		Setting::value(Setting::STREAM_URL, 'rtmp://test.stream');
+		Setting::value(Setting::STREAM_KEY, 'my-test-key');
+
+		Storage::disk('media')->put('default-background.png', file_get_contents(resource_path('./media/default-background.png')));
 
 		Livewire::test(Settings::class)
-			->assertSeeHtml(
-				Arr::map([
-					1280,
-					720,
-					'rtmp://test.stream',
-					Setting::value(Setting::NIGHTBOT_API_TOKEN),
-					'default-background.png',
-				],
-					fn (string $value) => "value=\"$value\""
-				));
+			->assertOk()
+			->assertSchemaStateSet(function (array $state) {
+
+				$this->assertEquals(1280, $state[Setting::BROADCAST_VIDEO_WIDTH]);
+				$this->assertEquals(720, $state[Setting::BROADCAST_VIDEO_HEIGHT]);
+				$this->assertEquals('rtmp://test.stream', $state[Setting::STREAM_URL]);
+				$this->assertEquals('my-test-key', $state[Setting::STREAM_KEY]);
+				$this->assertEquals('default-background.png', array_first($state[Setting::BROADCAST_BACKGROUND_PATH]));
+
+				// TODO: Nightbot
+
+			});
 	}
 
 	public function testCanUpdateVideoDimensions(): void
@@ -65,14 +70,14 @@ class SettingsTest extends TestCase
 
 		Livewire::test(Settings::class)
 			->fillForm([
-				Setting::BROADCAST_URL => 'rtmp://test.stream',
+				Setting::STREAM_URL => 'rtmp://test.stream',
 			])
 			->call('save')
 			->assertOk()
 			->assertHasNoErrors()
 			->assertNotified();
 
-		$this->assertEquals('rtmp://test.stream', Setting::value(Setting::BROADCAST_URL));
+		$this->assertEquals('rtmp://test.stream', Setting::value(Setting::STREAM_URL));
 	}
 
 	public function testBroadcastUrlMustUseRtmpProtocol(): void
@@ -81,13 +86,13 @@ class SettingsTest extends TestCase
 
 		Livewire::test(Settings::class)
 			->fillForm([
-				Setting::BROADCAST_URL => 'http://bad.stream',
+				Setting::STREAM_URL => 'http://bad.stream',
 			])
 			->call('save')
 			->assertHasErrors([
-				Setting::BROADCAST_URL,
+				'data.'.Setting::STREAM_URL,
 			]);
 
-		$this->assertNotEquals('http://bad.stream', Setting::value(Setting::BROADCAST_URL));
+		$this->assertNotEquals('http://bad.stream', Setting::value(Setting::STREAM_URL));
 	}
 }

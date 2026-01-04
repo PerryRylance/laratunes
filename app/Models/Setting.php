@@ -10,7 +10,9 @@ class Setting extends Model
 {
 	use HasFactory;
 
-	const BROADCAST_URL = 'broadcast-url';
+	const STREAM_URL = 'stream-url';
+
+	const STREAM_KEY = 'stream-key';
 
 	const BROADCAST_VIDEO_WIDTH = 'broadcast-video-width';
 
@@ -28,6 +30,21 @@ class Setting extends Model
 	public static function generateApiToken(): string
 	{
 		return bin2hex(new Randomizer()->getBytes(16));
+	}
+
+	public static function isFullyConfigured(): bool
+	{
+		foreach ([
+			Setting::BROADCAST_VIDEO_WIDTH,
+			Setting::BROADCAST_VIDEO_HEIGHT,
+			Setting::BROADCAST_BACKGROUND_PATH,
+			Setting::STREAM_URL,
+			Setting::STREAM_KEY,
+		] as $required)
+			if (empty(Setting::value($required)))
+				return false;
+
+		return true;
 	}
 
 	public static function value(string $name, $value = null): string|int|bool|null

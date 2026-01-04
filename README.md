@@ -59,11 +59,19 @@ The following assumes that you have purchased your domain, set up CloudFlare and
 You should now be able to access your instance of Laratunes via your domain.
 
 ### Accessing the admin panels
-You'll need to create a user account to access your instances admin panels by running `sail artisan make:filament-user` and following the steps.
-
-Once you've done that, run `sail artisan app:elevate-user-to-admin` passing the e-mail for your account as an argument.
-
 Visit `/admin` on your domain to log in.
+
+### Media discovery
+Your stream cannot start until you have some tracks to play.
+
+- If you already have audio in your media folder, use the media discovery tool through the UI. This can continue running after you close your browser or navigate away.
+- Alternatively you can add tracks manually through "Tracks" in the navigation menu.
+
+### Configuring the stream
+There are two ways to configure your stream,
+
+- Manually, go to YouTube, go live and obtain your stream URL and stream key, paste these into Laratunes' settings.
+- Coming soon: Automatic setup and SSO with Google
 
 ## Usage
 
@@ -89,7 +97,7 @@ Tests can be run with `sail test`.
 ### Streaming locally
 You can stream to `ffplay` locally to test your streams output.
 
-- In your `.env` set `BROADCAST_URL` to `rtmp://host.docker.internal` (in quotes)
+- In your `.env` set `STREAM_URL` to `rtmp://host.docker.internal` (in quotes)
 - Optionally, set a `MEDIA_PATH` into your `.env` (after changing this, you will need to `sail up -d --force-recreate` if you already started `sail`)
 - Run `sail app:discover-media` to 
 - On your host system, run `ffplay -timeout 120000000 rtmp://127.0.0.1` to wait with a very long timeout

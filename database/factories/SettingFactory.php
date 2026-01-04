@@ -23,25 +23,40 @@ class SettingFactory extends Factory
 		];
 	}
 
-	public function defaults(): Factory
+	public function pairs(array $pairs): Factory
 	{
-		$data = [
-			[
-				'name' => Setting::BROADCAST_VIDEO_WIDTH,
-				'value' => 1280,
-			],
-			[
-				'name' => Setting::BROADCAST_VIDEO_HEIGHT,
-				'value' => 720,
-			],
-			[
-				'name' => Setting::BROADCAST_BACKGROUND_PATH,
-				'value' => 'default-background.png',
-			],
-		];
+		$keys = array_keys($pairs);
+		$values = array_values($pairs);
+		$data = [];
+
+		for ($i = 0; $i < count($pairs); $i++)
+			$data[] = [
+				'name' => $keys[$i],
+				'value' => $values[$i],
+			];
 
 		return $this
 			->state(new Sequence(...$data))
 			->count(count($data));
+	}
+
+	public function defaults(): Factory
+	{
+		return $this->pairs([
+			Setting::BROADCAST_VIDEO_WIDTH => 1280,
+			Setting::BROADCAST_VIDEO_HEIGHT => 720,
+			Setting::BROADCAST_BACKGROUND_PATH => 'default-background.png',
+		]);
+	}
+
+	public function complete(): Factory
+	{
+		return $this->pairs([
+			Setting::BROADCAST_VIDEO_WIDTH => 1280,
+			Setting::BROADCAST_VIDEO_HEIGHT => 720,
+			Setting::BROADCAST_BACKGROUND_PATH => 'default-background.png',
+			Setting::STREAM_URL => 'rtmp://some.endpoint',
+			Setting::STREAM_KEY => 'my-key',
+		]);
 	}
 }

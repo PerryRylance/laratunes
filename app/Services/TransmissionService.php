@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Exceptions\ConfigurationException;
 use App\Exceptions\TransmissionException;
 use App\Facades\Ffmpeg;
-use Exception;
+use App\Models\Setting;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -18,14 +20,17 @@ class TransmissionService
 
 			Log::info('Beginning transmission');
 
-			if (empty(config('broadcast.url')))
-				throw new Exception('Broadcast URL not configured');
+			if (! Setting::isFullyConfigured())
+				throw new ConfigurationException("$required not configured");
 
 			static::work();
 
 		}
 		catch (Throwable $e)
 		{
+
+			if (App::runningUnitTests())
+				throw $e;
 
 			Log::error('Error transmitting: '.$e->getMessage());
 			exit(1);
@@ -35,13 +40,11 @@ class TransmissionService
 
 	private static function work(): void
 	{
-		[
-			'video_width' => $width,
-			'video_height' => $height,
-			'url' => $url,
-			'background' => $background
-		]
-			= config('broadcast');
+		$width = Setting::value(Setting::BROADCAST_VIDEO_WIDTH);
+		$height = Setting::value(Setting::BROADCAST_VIDEO_HEIGHT);
+		$background = Setting::value(Setting::BROADCAST_BACKGROUND_PATH);
+		$url = Setting::value(Setting::STREAM_URL);
+		$key = Setting::value(Setting::STREAM_KEY);
 
 		$process = Ffmpeg::start('Transmitter', priority: -10, params: [
 			// Read input in real-time to avoid bursts
@@ -152,7 +155,7 @@ class TransmissionService
 			'no_duration_filesize',
 
 			// RTMP URL
-			$url,
+			$url.'/'.$key,
 		]);
 
 		while ($process->running())

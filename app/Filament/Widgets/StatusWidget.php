@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Facades\Transmission;
 use App\Filament\Pages\Dashboard;
+use App\Models\Setting;
 use App\Models\Track;
 use Filament\Widgets\Widget;
 use Illuminate\View\View;
@@ -44,7 +45,7 @@ class StatusWidget extends Widget
 	public function render(): View
 	{
 		$this->hasTracks = Track::exists();
-		$this->isConfigured = false;
+		$this->isConfigured = Setting::isFullyConfigured();
 		$this->transmitting = Transmission::running();
 
 		return parent::render();

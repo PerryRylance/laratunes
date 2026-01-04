@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Setting;
 use Filament\Widgets\Widget;
 
 class ConfigureStreamCallout extends Widget
@@ -14,6 +15,6 @@ class ConfigureStreamCallout extends Widget
 
 	public static function canView(): bool
 	{
-		return true;
+		return ! Setting::isFullyConfigured();
 	}
 }

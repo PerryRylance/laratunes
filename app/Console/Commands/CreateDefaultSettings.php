@@ -30,7 +30,7 @@ class CreateDefaultSettings extends Command
 			Setting::BROADCAST_VIDEO_WIDTH => 1280,
 			Setting::BROADCAST_VIDEO_HEIGHT => 720,
 			Setting::BROADCAST_BACKGROUND_PATH => 'default-background.png',
-			Setting::BROADCAST_URL => '',
+			Setting::STREAM_URL => '',
 			Setting::NIGHTBOT_API_TOKEN => Setting::generateApiToken(),
 		] as $name => $value)
 			Setting::create([

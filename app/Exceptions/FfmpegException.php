@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Process\FakeInvokedProcess;
 use Illuminate\Process\InvokedProcess;
 use Illuminate\Support\Collection;
 
@@ -10,7 +11,7 @@ class FfmpegException extends Exception
 {
 	public readonly string $fullOutput;
 
-	public function __construct(InvokedProcess $process, string $message = '', int $code = 0, ?\Throwable $previous = null)
+	public function __construct(InvokedProcess|FakeInvokedProcess $process, string $message = '', int $code = 0, ?\Throwable $previous = null)
 	{
 		$output = $process->errorOutput();
 		$lines = new Collection(explode(PHP_EOL, $output));
