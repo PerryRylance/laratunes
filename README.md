@@ -73,7 +73,7 @@ Your stream cannot start until you have some tracks to play.
 There are two ways to configure your stream,
 
 - Manually, go to YouTube, go live and obtain your stream URL and stream key, paste these into Laratunes' settings.
-- Coming soon: Automatic setup and SSO with Google
+- ~~Automatically setup by visiting Settings and linking your admin account with your Google account and YouTube channel.~~ _(Coming soon!)_
 
 ## Usage
 
