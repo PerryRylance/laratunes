@@ -48,6 +48,8 @@ class SettingsTest extends TestCase
 
 	public function testCanUpdateVideoDimensions(): void
 	{
+		Setting::factory()->complete()->create();
+
 		Livewire::test(Settings::class)
 			->fillForm([
 				Setting::BROADCAST_VIDEO_WIDTH => 1920,
@@ -64,13 +66,14 @@ class SettingsTest extends TestCase
 
 	public function testCanRotateNightbotApiKey(): void {}
 
-	public function testCanManuallySetBroadcastUrl(): void
+	public function testCanManuallySetBroadcastUrlAndKey(): void
 	{
 		Setting::factory()->defaults()->create();
 
 		Livewire::test(Settings::class)
 			->fillForm([
 				Setting::STREAM_URL => 'rtmp://test.stream',
+				Setting::STREAM_KEY => 'super-secret',
 			])
 			->call('save')
 			->assertOk()
