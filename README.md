@@ -76,6 +76,9 @@ There are two ways to configure your stream,
 - ~~Automatically setup by visiting Settings and linking your admin account with your Google account and YouTube channel.~~ _(Coming soon!)_
 
 ## Usage
+Ensure you have completed all the steps in the Deployment section above.
+
+Once you have set in the required settings and discovered some tracks, please navigate `/admin/dashboard` on your domain and from there you will be prompted to click "Start Broadcast" to begin streaming.
 
 ## Development
 
