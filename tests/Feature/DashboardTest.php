@@ -98,6 +98,22 @@ class DashboardTest extends TestCase
 			->assertDontSeeLivewire(ConfigureStreamCallout::class);
 	}
 
+	public function testDontSeeReasonsInStatusWidgetWhenSettingsPresent(): void
+	{
+		Setting::factory()
+			->complete()
+			->create();
+
+		Track::factory()
+			->uploaded()
+			->create();
+
+		Livewire::test(StatusWidget::class)
+			->assertDontSee('The broadcast cannot be started:')
+			->assertDontSee('The stream is not configured.')
+			->assertDontSee('There are no tracks in your library.');
+	}
+
 	public function testSeeReasonInStatusWidgetWhenNoTracksPresent(): void
 	{
 		Setting::factory()

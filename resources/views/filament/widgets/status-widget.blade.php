@@ -13,23 +13,25 @@
             <flux:callout.heading>
                 Broadcast inactive
             </flux:callout.heading>
-            <flux:callout.text>
-                The broadcast cannot be started:
-                <div class="prose" style="--tw-prose-body: inherit; --tw-prose-bullets: var(--color-gray-500); font-size: inherit;">
-                    <ul>
-                        @if( !$isConfigured )
-                            <li>
-                                The stream is not configured.
-                            </li>
-                        @endif
-                        @if( !$hasTracks )
-                            <li>
-                                There are no tracks in your library.
-                            </li>
-                        @endif
-                    </ul>
-                </div>
-            </flux:callout.text>
+            @if(!$isConfigured || !$hasTracks)
+                <flux:callout.text>
+                    The broadcast cannot be started:
+                    <div class="prose" style="--tw-prose-body: inherit; --tw-prose-bullets: var(--color-gray-500); font-size: inherit;">
+                        <ul>
+                            @if( !$isConfigured )
+                                <li>
+                                    The stream is not configured.
+                                </li>
+                            @endif
+                            @if( !$hasTracks )
+                                <li>
+                                    There are no tracks in your library.
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                </flux:callout.text>
+            @endif
             <flux:button 
                 variant="primary" 
                 class="self-start"
