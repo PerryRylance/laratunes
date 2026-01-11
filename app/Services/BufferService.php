@@ -29,26 +29,30 @@ class BufferService
 
 	public static function loop(): void
 	{
-		try
+		while (true)
 		{
+			try
+			{
 
-			Log::info('Creating FIFO buffer');
-			Fifo::create(static::NOW_PLAYING_BUFFER_PATH);
+				Log::info('Creating FIFO buffer');
+				Fifo::create(static::NOW_PLAYING_BUFFER_PATH);
 
-			while (true)
-				static::bufferNextTrack();
+				while (true)
+					static::bufferNextTrack();
 
-		}
-		catch (Throwable $e)
-		{
+			}
+			catch (Throwable $e)
+			{
 
-			Log::error('Error buffering: '.$e->getMessage());
+				Log::error('Error buffering: '.$e->getMessage());
 
-			$handler = new Handler(app());
-			$handler->report($e);
+				$handler = new Handler(app());
+				$handler->report($e);
 
-			exit(1);
+				// NB: Try again
+				// exit(1);
 
+			}
 		}
 	}
 
