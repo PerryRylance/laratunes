@@ -13,6 +13,7 @@ use chillerlan\QRCode\QROptions;
 use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -29,30 +30,25 @@ class BufferService
 
 	public static function loop(): void
 	{
+		Log::info('Creating FIFO buffer');
+		Fifo::create(static::NOW_PLAYING_BUFFER_PATH);
+
 		while (true)
-		{
 			try
 			{
-
-				Log::info('Creating FIFO buffer');
-				Fifo::create(static::NOW_PLAYING_BUFFER_PATH);
-
-				while (true)
-					static::bufferNextTrack();
-
+				static::bufferNextTrack();
 			}
-			catch (Throwable $e)
-			{
+		catch (Throwable $e)
+		{
+			Log::error('Error buffering: '.$e->getMessage());
 
-				Log::error('Error buffering: '.$e->getMessage());
+			$handler = new Handler(app());
+			$handler->report($e);
 
-				$handler = new Handler(app());
-				$handler->report($e);
+			if (RateLimiter::tooManyAttempts('buffer-next-track', 10))
+				exit(1);
 
-				// NB: Try again
-				// exit(1);
-
-			}
+			RateLimiter::hit('buffer-next-track', 60);
 		}
 	}
 
