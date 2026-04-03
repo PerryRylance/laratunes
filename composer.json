@@ -70,7 +70,11 @@
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],
+        "post-install-cmd": [
+            "@php -r \"foreach(glob('vendor/chillerlan/php-qrcode/**/*.php') as \\$f) file_put_contents(\\$f, preg_replace('/.*imagedestroy.*/', '// $0', file_get_contents(\\$f)));\""
+        ],
         "post-update-cmd": [
+            "@php -r \"foreach(glob('vendor/chillerlan/php-qrcode/**/*.php') as \\$f) file_put_contents(\\$f, preg_replace('/.*imagedestroy.*/', '// $0', file_get_contents(\\$f)));\"",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [

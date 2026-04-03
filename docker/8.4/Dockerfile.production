@@ -42,6 +42,3 @@ RUN \
 	# Install NPM packages and build
 	npm install \
 	npm run build
-
-# Patch QR code generator, stops deprecation notice crashing the server
-RUN find /app/vendor/chillerlan/php-qrcode -name "*.php" -exec sed -i 's/.*imagedestroy.*/\/\/ &/' {} +
