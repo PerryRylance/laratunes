@@ -30,6 +30,8 @@ Laratunes is an open source streaming radio, RTMP client and web interface.
 ### Starting 
 - Once you have completed setup, start the app with `./start.sh`
 
+If you need to then you can also `./stop.sh` and `./restart.sh`.
+
 ### Serving
 
 #### Via port 443
@@ -63,6 +65,7 @@ The following assumes that you have purchased your domain, set up CloudFlare and
     - `sudo cp /home/pi/.cloudflared/* /root/.cloudflared/`
     - `sudo cloudflared service install`
 - Lastly, __you need to configure FrankenPHP__ not to do https:// redirect as the tunnel will handle that, by seeing `SERVER_NAME=:80` in your `.env`
+- If you started the app already you can `./restart.sh` to apply the change above
 
 You should now be able to access your instance of Laratunes via your domain.
 
