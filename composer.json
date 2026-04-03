@@ -70,11 +70,7 @@
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],
-        "post-install-cmd": [
-            "@php -r \"\\$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator('vendor/chillerlan/php-qrcode')); foreach(\\$dir as \\$file) { if(\\$file->getExtension() === 'php') { file_put_contents(\\$file->getPathname(), preg_replace('/.*imagedestroy.*/', '', file_get_contents(\\$file->getPathname()))); } }\""
-        ],
         "post-update-cmd": [
-            "@php -r \"\\$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator('vendor/chillerlan/php-qrcode')); foreach(\\$dir as \\$file) { if(\\$file->getExtension() === 'php') { file_put_contents(\\$file->getPathname(), preg_replace('/.*imagedestroy.*/', '', file_get_contents(\\$file->getPathname()))); } }\"",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [
