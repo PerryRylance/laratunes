@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
 
 # PHP extensions
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" || true
+RUN sed -i 'error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT' "$PHP_INI_DIR/php.ini"
+
 RUN install-php-extensions intl redis pcntl sockets gd
 
 # Laratunes FIFO buffers
