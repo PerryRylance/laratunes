@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Exceptions\BufferException;
 use App\Facades\Ffmpeg;
-use App\Facades\Fifo;
 use App\Models\Track;
 use chillerlan\QRCode\Common\EccLevel;
 use chillerlan\QRCode\Output\QROutputInterface;
@@ -30,9 +29,6 @@ class BufferService
 
 	public static function loop(): void
 	{
-		Log::info('Creating FIFO buffer');
-		Fifo::create(static::NOW_PLAYING_BUFFER_PATH);
-
 		Log::info('Entering buffer loop');
 
 		while (true)

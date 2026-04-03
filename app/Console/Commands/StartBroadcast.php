@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Facades\Buffer;
+use App\Facades\Fifo;
 use App\Facades\Transmission;
+use App\Services\BufferService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Concurrency;
@@ -35,6 +37,11 @@ class StartBroadcast extends Command
 
 		// TODO: Doesn't handle the transmission being cut well, need to know please
 
+		Log::info('Creating "now playing" buffer');
+		Fifo::create(BufferService::NOW_PLAYING_BUFFER_PATH);
+
+		Log::info('Beginning buffer loop, transmission and monitoring...');
+
 		try
 		{
 			Concurrency::driver('fork')->run([
@@ -42,6 +49,8 @@ class StartBroadcast extends Command
 				fn () => Transmission::begin(),
 				fn () => Artisan::call('app:monitor'),
 			]);
+
+			Log::info('All processes launched');
 		}
 		catch (CouldNotManageTask)
 		{
