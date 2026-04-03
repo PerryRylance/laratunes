@@ -25,6 +25,8 @@ class FifoService
 			throw new \Exception($message);
 		}
 
+		Log::info("Resizing FIFO at $file...");
+
 		$result = Process::run('set_fifo_size');
 		$output = $result->output();
 
