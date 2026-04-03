@@ -27,7 +27,7 @@ class FifoService
 
 		Log::info("Resizing FIFO at $file...");
 
-		$result = Process::run('set_fifo_size');
+		$result = Process::timeout(5)->run('set_fifo_size');
 		$output = $result->output();
 
 		if ($result->failed())
