@@ -27,10 +27,15 @@ Laratunes is an open source streaming radio, RTMP client and web interface.
 - Clone this repository `git clone https://github.com/PerryRylance/laratunes && cd laratunes`
 - Run `./install.sh` and follow the instructions
 
-### Via port 443
+### Starting 
+- Once you have completed setup, start the app with `./start.sh`
+
+### Serving
+
+#### Via port 443
 > TODO: Write up documentation here, Caddy / FrankenPHP should take care of everything
 
-### Via CloudFlare tunnel
+#### Via CloudFlare tunnel
 The following assumes that you have purchased your domain, set up CloudFlare and set your domains nameservers to the given values from CloudFlare.
 
 - Download CloudFlare's tunnel client, on a Pi 5 you can use `curl -LO https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64.deb`
