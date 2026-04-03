@@ -7,7 +7,7 @@ services:
     environment:
       - USER_ID=${WWWUSER:-1000}
       - GROUP_ID=${WWWGROUP:-1000}
-      - SERVER_NAME=${SERVED_VIA_TUNNEL:+http://}${APP_URL:-localhost}
+      - SERVER_NAME=${SERVED_VIA_TUNNEL:+:80}${SERVED_VIA_TUNNEL:-${APP_URL}}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 2s
