@@ -13,6 +13,8 @@ class FifoService
 
 	public static function create(string $file): void
 	{
+		Log::info("Creating FIFO at $file...");
+
 		$result = Process::run("rm -f $file && mkfifo $file");
 
 		if ($result->failed())
