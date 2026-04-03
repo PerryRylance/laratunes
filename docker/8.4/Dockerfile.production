@@ -2,15 +2,25 @@ FROM dunglas/frankenphp
 
 USER root
 
-RUN mkdir -p /buffers && chmod 777 /buffers
-
+# Dependencies
 RUN apt-get update && apt-get install -y \
     procps \
 	ffmpeg
 
+# PHP extensions
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" || true
 RUN install-php-extensions intl redis pcntl sockets
 
+# Laratunes FIFO buffers
+COPY ext/set_fifo_size.c /tmp/set_fifo_size.c
+RUN gcc -O2 -o /usr/local/bin/set_fifo_size /tmp/set_fifo_size.c
+
+COPY ext/get_fifo_bytes_available.c /tmp/get_fifo_bytes_available.c
+RUN gcc -O2 -o /usr/local/bin/get_fifo_bytes_available /tmp/get_fifo_bytes_available.c
+
+RUN mkdir -p /buffers && chmod 777 /buffers
+
+# Configure FrankenPHP
 RUN useradd -m ${USER} || true
 
 ARG USER=1000
@@ -23,6 +33,7 @@ RUN \
 	# Give write access to /config/caddy and /data/caddy
 	chown -R ${USER}:${USER} /config/caddy /data/caddy
 
+# Build
 RUN \
 	# Install Composer packages
 	cd /app/public \
