@@ -2,6 +2,8 @@ FROM dunglas/frankenphp
 
 USER root
 
+RUN mkdir -p /buffers && chmod 777 /buffers
+
 RUN apt-get update && apt-get install -y \
     procps \
 	ffmpeg
