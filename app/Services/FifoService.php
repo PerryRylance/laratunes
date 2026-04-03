@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Process\Exceptions\ProcessTimedOutException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 
@@ -27,7 +28,15 @@ class FifoService
 
 		Log::info("Resizing FIFO at $file...");
 
-		$result = Process::timeout(5)->run('set_fifo_size');
+		try
+		{
+			$result = Process::timeout(5)->run('set_fifo_size');
+		}
+		catch (ProcessTimedOutException)
+		{
+			throw new \Exception('Failed to set FIFO size, operation timed out');
+		}
+
 		$output = $result->output();
 
 		if ($result->failed())
