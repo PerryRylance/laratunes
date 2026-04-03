@@ -62,7 +62,7 @@ The following assumes that you have purchased your domain, set up CloudFlare and
     - `sudo mkdir -p /root/.cloudflared`
     - `sudo cp /home/pi/.cloudflared/* /root/.cloudflared/`
     - `sudo cloudflared service install`
-- Lastly, __you need to configure FrankenPHP__ not to do https:// redirect as the tunnel will handle that, by seeing `SERVED_VIA_TUNNEL=true` in your `.env`
+- Lastly, __you need to configure FrankenPHP__ not to do https:// redirect as the tunnel will handle that, by seeing `SERVER_NAME=:80` in your `.env`
 
 You should now be able to access your instance of Laratunes via your domain.
 
