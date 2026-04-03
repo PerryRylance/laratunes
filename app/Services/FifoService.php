@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 
 class FifoService
@@ -32,6 +33,8 @@ class FifoService
 			throw new \Exception("Failed to match created FIFO size in $output");
 
 		static::$capacity = (int) $m[1];
+
+		Log::info("Created FIFO at $file with ".static::$capacity.' bytes capacity');
 	}
 
 	public static function capacity(): int

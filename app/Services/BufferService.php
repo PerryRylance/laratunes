@@ -33,22 +33,26 @@ class BufferService
 		Log::info('Creating FIFO buffer');
 		Fifo::create(static::NOW_PLAYING_BUFFER_PATH);
 
+		Log::info('Entering buffer loop');
+
 		while (true)
+		{
 			try
 			{
 				static::bufferNextTrack();
 			}
-		catch (Throwable $e)
-		{
-			Log::error('Error buffering: '.$e->getMessage());
+			catch (Throwable $e)
+			{
+				Log::error('Error buffering: '.$e->getMessage());
 
-			$handler = new Handler(app());
-			$handler->report($e);
+				$handler = new Handler(app());
+				$handler->report($e);
 
-			if (RateLimiter::tooManyAttempts('buffer-next-track', 10))
-				exit(1);
+				if (RateLimiter::tooManyAttempts('buffer-next-track', 10))
+					exit(1);
 
-			RateLimiter::hit('buffer-next-track', 60);
+				RateLimiter::hit('buffer-next-track', 60);
+			}
 		}
 	}
 
