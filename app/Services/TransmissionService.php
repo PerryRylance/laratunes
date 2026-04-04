@@ -109,8 +109,8 @@ class TransmissionService
 			'18',
 			'-pix_fmt',
 			'yuv420p',
-			'-b:v',
-			'2500k', // NB: YouTube's recommendation
+			// '-b:v',
+			// '2500k', // NB: YouTube's recommendation, seems to be at odds with the crf though
 			// '-b:v',
 			// '10M', // NB: Recommended for 1080p, probably overkill for this
 
@@ -126,13 +126,13 @@ class TransmissionService
 			'1',
 			'-preset',
 			'slow',
-			'-tune',
-			'zerolatency',
+			// '-tune',
+			// 'zerolatency',
 			// NB: 30fps is suggested here https://www.reddit.com/r/ffmpeg/comments/r1qwyy/best_streaming_settings_for_youtube/?rdt=49142 but this breaks the stream
 			// '-r',
 			// '30',
 			'-g',
-			'15',
+			'60', // NB: YouTube wants a keyframe every 2 seconds
 			// '-vsync',
 			// 'passthrough',
 			'-movflags',
