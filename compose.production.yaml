@@ -2,7 +2,7 @@ services:
   laravel:
     image: dunglas/frankenphp
     build:
-      context: ./docker/8.4
+      context: .
       dockerfile: Dockerfile.production
     environment:
       - USER_ID=${WWWUSER:-1000}

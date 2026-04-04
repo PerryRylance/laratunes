@@ -1,0 +1,49 @@
+# Stage 1: PHP Dependencies
+FROM composer:2.8 AS vendor
+
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-php-extensions
+RUN install-php-extensions intl redis pcntl sockets gd
+
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --optimize-autoloader
+
+# Stage 2: Asset Build
+FROM node:24-alpine AS frontend
+WORKDIR /app
+# Vite / Tailwind need configs and the vendor folder to scan for classes
+COPY --from=vendor /app/vendor ./vendor
+COPY package*.json vite.config.js ./ 
+COPY resources/ ./resources/
+RUN npm install && npm run build
+
+# Stage 3: Final Production Image
+FROM dunglas/frankenphp:1-php8.4
+
+ARG USER=1000
+RUN apt-get update && apt-get install -y procps ffmpeg gcc libc6-dev
+
+COPY ./docker/8.4/php.ini-production $PHP_INI_DIR/php.ini
+RUN install-php-extensions intl redis pcntl sockets gd
+
+# Compile C utilities
+COPY ext/*.c /tmp/
+RUN gcc -O2 -o /usr/local/bin/set_fifo_size /tmp/set_fifo_size.c \
+    && gcc -O2 -o /usr/local/bin/get_fifo_bytes_available /tmp/get_fifo_bytes_available.c \
+    && rm -rf /tmp/*.c
+
+WORKDIR /app
+
+# Setup user and system dirs before copying app code
+RUN useradd -u ${USER} -m appuser || true \
+    && mkdir -p /buffers /config/caddy /data/caddy \
+    && chown -R appuser:appuser /app /buffers /config/caddy /data/caddy \
+    && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp
+
+# Single, clean COPY as appuser
+COPY --chown=appuser:appuser . .
+COPY --from=vendor --chown=appuser:appuser /app/vendor ./vendor
+COPY --from=frontend --chown=appuser:appuser /app/public/build ./public/build
+
+USER appuser
