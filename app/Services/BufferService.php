@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\BufferException;
 use App\Facades\Ffmpeg;
+use App\Models\Setting;
 use App\Models\Track;
 use chillerlan\QRCode\Common\EccLevel;
 use chillerlan\QRCode\Output\QROutputInterface;
@@ -30,6 +31,13 @@ class BufferService
 	public static function loop(): void
 	{
 		Log::info('Entering buffer loop');
+
+		if (! Setting::isFullyConfigured())
+		{
+			Log::error('Settings are not fully configured. Please ensure you have set in video dimensions, a background, stream URL and key in the settings panel');
+
+			return;
+		}
 
 		while (true)
 		{
@@ -78,8 +86,8 @@ class BufferService
 		static::writeCaptionFile($track);
 		static::writeQrCode($track);
 
-		$width = config('broadcast.video_width');
-		$height = config('broadcast.video_height');
+		$width = Setting::value(Setting::BROADCAST_VIDEO_WIDTH);
+		$height = Setting::value(Setting::BROADCAST_VIDEO_HEIGHT);
 
 		$file = Storage::disk('media')->path($track->path);
 		$caption = static::NOW_PLAYING_CAPTION_PATH;
