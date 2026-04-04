@@ -109,6 +109,8 @@ class TransmissionService
 			'18',
 			'-pix_fmt',
 			'yuv420p',
+			'-b:v',
+			'2500k', // NB: YouTube's recommendation
 			// '-b:v',
 			// '10M', // NB: Recommended for 1080p, probably overkill for this
 
