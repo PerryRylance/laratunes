@@ -1,44 +1,35 @@
 FROM dunglas/frankenphp
 
-USER root
-
-# Dependencies
+ARG USER=1000
 RUN apt-get update && apt-get install -y \
     procps \
-	ffmpeg
+    ffmpeg \
+    gcc \
+    libc6-dev
 
 # PHP extensions
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" || true
-
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 RUN install-php-extensions intl redis pcntl sockets gd
 
-# Laratunes FIFO buffers
-COPY ext/set_fifo_size.c /tmp/set_fifo_size.c
-RUN gcc -O2 -o /usr/local/bin/set_fifo_size /tmp/set_fifo_size.c
+# Compile C utilities and cleanup immediately
+COPY ext/*.c /tmp/
+RUN gcc -O2 -o /usr/local/bin/set_fifo_size /tmp/set_fifo_size.c \
+    && gcc -O2 -o /usr/local/bin/get_fifo_bytes_available /tmp/get_fifo_bytes_available.c \
+    && rm -rf /tmp/*.c
 
-COPY ext/get_fifo_bytes_available.c /tmp/get_fifo_bytes_available.c
-RUN gcc -O2 -o /usr/local/bin/get_fifo_bytes_available /tmp/get_fifo_bytes_available.c
+# Setup application directory and user
+WORKDIR /app
+RUN useradd -u ${USER} -m appuser || true \
+    && mkdir -p /buffers /config/caddy /data/caddy \
+    && chown -R appuser:appuser /app /buffers /config/caddy /data/caddy \
+    && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp
 
-RUN mkdir -p /buffers && chmod 777 /buffers
+# Copy code as the created user to avoid permission issues
+COPY --chown=appuser:appuser . .
 
-# Configure FrankenPHP
-RUN useradd -m ${USER} || true
+USER appuser
 
-ARG USER=1000
-
-RUN \
-	# Use "adduser -D ${USER}" for alpine based distros
-	useradd ${USER}; \
-	# Add additional capability to bind to port 80 and 443
-	setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp; \
-	# Give write access to /config/caddy and /data/caddy
-	chown -R ${USER}:${USER} /config/caddy /data/caddy
-
-# Build
-RUN \
-	# Install Composer packages
-	cd /app/public \
-	composer install --no-dev --optimize-autoloader \
-	# Install NPM packages and build
-	npm install \
-	npm run build
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader \
+    && npm install \
+    && npm run build
