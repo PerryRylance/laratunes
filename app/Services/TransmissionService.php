@@ -106,7 +106,7 @@ class TransmissionService
 			'-bf',
 			'2',
 			'-crf',
-			'19',
+			'21',
 			'-pix_fmt',
 			'yuv420p',
 			// '-b:v',
