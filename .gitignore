@@ -27,3 +27,4 @@ yarn-error.log
 *:Zone.Identifier
 /tests.output
 /screenshot.jpg
+/tmp

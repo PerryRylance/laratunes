@@ -51,8 +51,8 @@ class TransmissionService
 			'-re',
 
 			// Verbose logs for debugging
-			'-loglevel',
-			'debug',
+			// '-loglevel',
+			// 'debug',
 
 			// Loop the video indefinitely
 			'-stream_loop',
@@ -106,7 +106,7 @@ class TransmissionService
 			'-bf',
 			'2',
 			'-crf',
-			'18',
+			'19',
 			'-pix_fmt',
 			'yuv420p',
 			// '-b:v',
