@@ -105,10 +105,21 @@ class TransmissionService
 			'high',
 			'-bf',
 			'2',
-			'-crf',
-			'21',
+
+			'-b:v',
+			'2000k', // Steady as a rock, exactly what YouTube ordered!
+			'-maxrate',
+			'2000k', // Strict ceiling! No spiking past the defenders!
+			'-bufsize',
+			'4000k', // 2x your bitrate is standard practice for a smooth buffer stream!
+
+			// NB: Only for local capture, not for streaming
+			// '-crf',
+			// '21',
+
 			'-pix_fmt',
 			'yuv420p',
+
 			// '-b:v',
 			// '2500k', // NB: YouTube's recommendation, seems to be at odds with the crf though
 			// '-b:v',
@@ -125,7 +136,8 @@ class TransmissionService
 			'-coder',
 			'1',
 			'-preset',
-			'slow',
+			'veryfast',
+
 			// '-tune',
 			// 'zerolatency',
 			// NB: 30fps is suggested here https://www.reddit.com/r/ffmpeg/comments/r1qwyy/best_streaming_settings_for_youtube/?rdt=49142 but this breaks the stream
@@ -139,10 +151,10 @@ class TransmissionService
 			'+faststart',
 
 			// Buffering / max delay tuning to reduce choppiness
-			'-bufsize',
-			'2M',
-			'-max_delay',
-			'500k',
+			// '-bufsize',
+			// '2M',
+			// '-max_delay',
+			// '500k',
 
 			// Performance tweaks
 			'-threads',
