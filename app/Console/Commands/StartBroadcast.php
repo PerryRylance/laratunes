@@ -10,6 +10,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Spatie\Fork\Exceptions\CouldNotManageTask;
 
 class StartBroadcast extends Command
@@ -36,25 +37,32 @@ class StartBroadcast extends Command
 		Log::info('Starting broadcast');
 
 		// TODO: Doesn't handle the transmission being cut well, need to know please
-
-		Log::info('Creating "now playing" buffer');
-		Fifo::create(BufferService::NOW_PLAYING_BUFFER_PATH);
-
-		Log::info('Beginning buffer loop, transmission and monitoring...');
-
-		try
+		while (true)
 		{
-			Concurrency::driver('fork')->run([
-				fn () => Buffer::loop(),
-				fn () => Transmission::begin(),
-				fn () => Artisan::call('app:monitor'),
-			]);
+			try
+			{
+				Log::info('Creating "now playing" buffer');
+				Fifo::create(BufferService::NOW_PLAYING_BUFFER_PATH);
 
-			Log::info('All processes launched');
-		}
-		catch (CouldNotManageTask)
-		{
-			$this->fail('Broadcast stopped unexpectedly, check the logs for more information');
+				Log::info('Beginning buffer loop, transmission and monitoring...');
+
+				Concurrency::driver('fork')->run([
+					fn () => Buffer::loop(),
+					fn () => Transmission::begin(),
+					fn () => Artisan::call('app:monitor'),
+				]);
+
+				Log::info('All processes launched');
+			}
+			catch (CouldNotManageTask)
+			{
+				$this->fail('Broadcast stopped unexpectedly, check the logs for more information');
+
+				if (RateLimiter::tooManyAttempts('resume-broadcast', 10))
+					exit(1);
+
+				RateLimiter::hit('resume-broadcast', 60);
+			}
 		}
 
 		// TODO: Trap sigterm? Differentiate between OS requested shutdown and processes ended unexpectedly?
