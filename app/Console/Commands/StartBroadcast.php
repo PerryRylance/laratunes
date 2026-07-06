@@ -56,10 +56,11 @@ class StartBroadcast extends Command
 			}
 			catch (CouldNotManageTask)
 			{
-				$this->fail('Broadcast stopped unexpectedly, check the logs for more information');
-
 				if (RateLimiter::tooManyAttempts('resume-broadcast', 10))
+				{
+					$this->fail('Broadcast stopped unexpectedly and could not be resumed, check the logs for more information');
 					exit(1);
+				}
 
 				RateLimiter::hit('resume-broadcast', 60);
 			}
