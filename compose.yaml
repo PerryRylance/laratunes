@@ -41,6 +41,8 @@ services:
       - './.olaf/docker_dbs:/root/.olaf'
       - './docker/olaf/scripts:/var/www/html'
       - ${MEDIA_PATH-./storage/framework/testing/disks/media}:/root/audio
+    networks:
+      - laratunes
   redis:
     image: 'redis:alpine'
     ports:

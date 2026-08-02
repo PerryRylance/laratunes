@@ -18,7 +18,7 @@ class OlafService implements OlafContract
 		return;
 
 		static::$client = new \GuzzleHttp\Client([
-			'base_uri' => 'http://host.docker.internal:5000/',
+			'base_uri' => 'http://'.env('OLAF_HOST', 'olaf').':'.env('OLAF_PORT', 5000).'/',
 		]);
 	}
 
