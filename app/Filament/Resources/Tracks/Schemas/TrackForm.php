@@ -16,6 +16,7 @@ use Filament\Support\Enums\Operation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Throwable;
@@ -45,6 +46,7 @@ class TrackForm
 					->hiddenOn([Operation::View, Operation::Edit])
 					->required()
 					->live()
+					->hint('Maximum size: '.Number::fileSize(static::getMaxUploadSize()))
 					->afterStateUpdated(function ($state): void {
 
 						$file = is_array($state) ? Arr::first($state) : $state;
@@ -105,6 +107,30 @@ class TrackForm
 					->view('filament.forms.fields.audio-player')
 					->hiddenOn([Operation::Create]),
 			]);
+	}
+
+	private static function getMaxUploadSize(): int
+	{
+		// NB: The browser/server will reject uploads past whichever of these two ini limits is smaller,
+		// regardless of any Filament ->maxSize() rule, so the hint must reflect the real ceiling.
+		return min(
+			static::parseIniSize(ini_get('upload_max_filesize') ?: '2M'),
+			static::parseIniSize(ini_get('post_max_size') ?: '8M'),
+		);
+	}
+
+	private static function parseIniSize(string $size): int
+	{
+		$unit = strtolower(substr($size, -1));
+		$value = (int) $size;
+
+		return match ($unit)
+		{
+			'g' => $value * 1024 ** 3,
+			'm' => $value * 1024 ** 2,
+			'k' => $value * 1024,
+			default => (int) $size,
+		};
 	}
 
 	private static function warnAboutDuplicates(TemporaryUploadedFile $file): void
