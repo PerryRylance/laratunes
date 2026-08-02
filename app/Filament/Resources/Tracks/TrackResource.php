@@ -9,6 +9,7 @@ use App\Filament\Resources\Tracks\Pages\ViewTrack;
 use App\Filament\Resources\Tracks\Schemas\TrackForm;
 use App\Filament\Resources\Tracks\Schemas\TrackInfolist;
 use App\Filament\Resources\Tracks\Tables\TracksTable;
+use App\Filament\Widgets\FileMissingCallout;
 use App\Models\Track;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -54,6 +55,17 @@ class TrackResource extends Resource
 			'create' => CreateTrack::route('/create'),
 			'view' => ViewTrack::route('/{record}'),
 			'edit' => EditTrack::route('/{record}/edit'),
+		];
+	}
+
+	public static function getWidgets(): array
+	{
+		// NB: FileMissingCallout is only ever rendered conditionally from ViewTrack::getHeaderWidgets(),
+		// but it still needs to be listed here - this is what makes Filament pre-register it as a
+		// Livewire component alias. Without that, Livewire throws ComponentNotFoundException whenever
+		// it needs to rehydrate this widget by name instead of mounting it fresh from the class.
+		return [
+			FileMissingCallout::class,
 		];
 	}
 }

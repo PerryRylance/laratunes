@@ -42,6 +42,17 @@ class DashboardTest extends TestCase
 			->assertDontSeeLivewire(FileMissingCallout::class);
 	}
 
+	public function testFileMissingCalloutIsNotLazy(): void
+	{
+		// NB: Livewire::test() mounts widgets directly by class, so it never exercises the
+		// "resolve by name" path a lazy widget's follow-up AJAX request depends on - that path
+		// throws ComponentNotFoundException here, because this app's livewire.class_namespace
+		// (App\Livewire) doesn't match where Filament widgets actually live (App\Filament\Widgets).
+		// Every custom widget therefore disables lazy loading - see DiscoverMediaCallout,
+		// ConfigureStreamCallout, StatusWidget - so this asserts FileMissingCallout keeps doing the same.
+		$this->assertFalse(FileMissingCallout::isLazy());
+	}
+
 	public function testSeeDiscoverMediaCalloutWhenNoTracksPresent(): void
 	{
 		$this->actingAs(User::factory()->admin()->create());

@@ -9,4 +9,6 @@ class FileMissingCallout extends Widget
 	protected string $view = 'filament.widgets.file-missing-callout';
 
 	protected array|string|int $columnSpan = 2;
+
+	protected static bool $isLazy = false;
 }

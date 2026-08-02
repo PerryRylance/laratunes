@@ -28,6 +28,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Livewire\Mechanisms\ComponentRegistry;
 use RuntimeException;
 use Tests\AdminTestCase;
 
@@ -791,5 +792,30 @@ class TrackTest extends AdminTestCase
 		])
 			->assertOk()
 			->assertDontSeeLivewire(FileMissingCallout::class);
+	}
+
+	public function testFileMissingCalloutCanBeRehydratedByItsLivewireName(): void
+	{
+		// NB: Livewire::test() and assertSeeLivewire() above only ever mount this widget by
+		// class reference, so they can't catch what actually broke in production: Livewire
+		// rehydrates a page's nested widgets from their stored snapshot *name* on every
+		// subsequent request, and that requires the widget to be pre-registered as a Livewire
+		// component alias - which only happens for widgets Filament actually knows about via
+		// TrackResource::getWidgets(), not ones only referenced inside ViewTrack::getHeaderWidgets().
+		// Visiting the page first is what triggers that registration, matching real usage.
+		$track = Track::factory()->uploaded()->create();
+
+		Storage::disk('media')->delete($track->path);
+
+		Livewire::test(ViewTrack::class, [
+			'record' => $track->id,
+		])
+			->assertOk();
+
+		$registry = app(ComponentRegistry::class);
+
+		$component = $registry->new($registry->getName(FileMissingCallout::class));
+
+		$this->assertInstanceOf(FileMissingCallout::class, $component);
 	}
 }

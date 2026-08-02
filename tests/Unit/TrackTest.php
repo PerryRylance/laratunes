@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Track;
+use App\Models\TrackHasDuplicates;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Tests\TestCase;
 use Tests\TestFiles;
@@ -49,4 +50,53 @@ class TrackTest extends TestCase
 	}
 
 	public function testAdminLink(): void {}
+
+	public function testDeletingOriginalTrackCascadesToTrackHasDuplicates(): void
+	{
+		[$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+		$original->duplicates()->attach($duplicate);
+
+		$this->assertDatabaseHas(TrackHasDuplicates::class, [
+			'original_id' => $original->id,
+			'duplicate_id' => $duplicate->id,
+		]);
+
+		$original->delete();
+
+		$this->assertDatabaseMissing(TrackHasDuplicates::class, [
+			'original_id' => $original->id,
+			'duplicate_id' => $duplicate->id,
+		]);
+	}
+
+	public function testDeletingDuplicateTrackCascadesToTrackHasDuplicates(): void
+	{
+		[$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+		$original->duplicates()->attach($duplicate);
+
+		$duplicate->delete();
+
+		$this->assertDatabaseMissing(TrackHasDuplicates::class, [
+			'original_id' => $original->id,
+			'duplicate_id' => $duplicate->id,
+		]);
+	}
+
+	public function testBulkDeletingTracksCascadesToTrackHasDuplicates(): void
+	{
+		// NB: A bulk/query delete (eg. Track::query()->delete()) bypasses Eloquent model events
+		// entirely, so TrackObserver can't clean this up - only a real database-level cascade can.
+		[$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+		$original->duplicates()->attach($duplicate);
+
+		Track::query()->delete();
+
+		$this->assertDatabaseMissing(TrackHasDuplicates::class, [
+			'original_id' => $original->id,
+			'duplicate_id' => $duplicate->id,
+		]);
+	}
 }
