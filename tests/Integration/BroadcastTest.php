@@ -43,7 +43,31 @@ class BroadcastTest extends TestCase
 		if (! empty($this->process))
 			$this->process->stop(10, SIGKILL);
 
+		$this->killOrphanedBroadcastProcesses();
+
 		parent::tearDown();
+	}
+
+	private function killOrphanedBroadcastProcesses(): void
+	{
+		// NB: app:start-broadcast forks children via pcntl_fork() (Concurrency::driver('fork')),
+		// which Symfony's Process never tracks - stop() only reaches the top-level artisan
+		// process, so any fork children (and further retries the broadcast loop spawned before
+		// we could stop it) have to be swept up separately, or they leak for the container's
+		// lifetime. Reading /proc directly (rather than eg. `pkill -f`) avoids the search itself
+		// running through a shell whose own command line would match the pattern it's searching for.
+		foreach (glob('/proc/[0-9]*/cmdline') as $file)
+		{
+			$cmdline = @file_get_contents($file);
+
+			if ($cmdline === false || ! str_contains($cmdline, 'app:start-broadcast'))
+			continue;
+
+			if (! preg_match('#^/proc/(\d+)/cmdline$#', $file, $matches))
+			continue;
+
+			@posix_kill((int) $matches[1], SIGKILL);
+		}
 	}
 
 	public function testNowPlayingBufferCreated(): void
