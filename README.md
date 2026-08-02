@@ -99,14 +99,16 @@ Once you have set in the required settings and discovered some tracks, please na
 ### Starting the containers
 This project uses [Laravel Sail](https://laravel.com/docs/12.x/sail) to run in development.
 
-`sail up -d`
+`sail up`
 
 If you intend to develop or run the browser tests then you should also run
 
-`sail npm run dev`
+`sail composer run dev`
 
 ### Testing
 Tests can be run with `sail test`.
+
+Please note that many tests use a fake disk, this is bound when the container goes up so you will need to drop the `MEDIA_PATH` from `.env` **before** `sail up` for the tests to succeed.
 
 ### Streaming locally
 You can stream to `ffplay` locally to test your streams output.
