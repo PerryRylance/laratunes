@@ -34,6 +34,10 @@ class TrackObserver
 
 	public function created(Track $track): void
 	{
+		// NB: Give this more headroom than the Guzzle timeout so Guzzle - not PHP's own execution
+		// limit - is what decides when a slow Olaf request gives up.
+		set_time_limit(config('olaf.timeout') + 30);
+
 		Olaf::fingerprint($track->path);
 
 		$duplicates = Olaf::query($track->path);

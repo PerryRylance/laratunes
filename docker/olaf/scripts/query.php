@@ -1,5 +1,9 @@
 <?php
 
+// NB: Give this more headroom than OLAF_TIMEOUT so the calling Guzzle client - not this
+// script's own execution limit - is what decides when a slow request gives up.
+set_time_limit(((int) (getenv('OLAF_TIMEOUT') ?: 120)) + 30);
+
 header('Content-type: text/plain');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET')

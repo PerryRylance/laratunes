@@ -29,6 +29,8 @@ services:
     build:
       context: ./Olaf
       dockerfile: ../docker/olaf/Dockerfile
+    environment:
+      - OLAF_TIMEOUT=${OLAF_TIMEOUT:-120}
     command:
       - php
       - '-S'

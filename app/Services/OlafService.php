@@ -18,7 +18,8 @@ class OlafService implements OlafContract
 		return;
 
 		static::$client = new \GuzzleHttp\Client([
-			'base_uri' => 'http://'.env('OLAF_HOST', 'olaf').':'.env('OLAF_PORT', 5000).'/',
+			'base_uri' => 'http://'.config('olaf.host').':'.config('olaf.port').'/',
+			'timeout' => config('olaf.timeout'),
 		]);
 	}
 
