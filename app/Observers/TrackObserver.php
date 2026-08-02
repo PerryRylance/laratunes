@@ -16,7 +16,8 @@ class TrackObserver
 	{
 		$path = Storage::disk('media')->path($track->path);
 
-		$track->hash = md5_file($path);
+		if (file_exists($path))
+			$track->hash = md5_file($path);
 
 		if ($track->title === null || $track->artist === null)
 		{

@@ -72,9 +72,7 @@ class BufferService
 			'outputType' => QROutputInterface::GDIMAGE_PNG,
 		]));
 
-		// TODO: This needs to be the URL not just the hash
-
-		$qrcode->render($track->hash, static::NOW_PLAYING_QR_CODE_PATH);
+		$qrcode->render($track->url, static::NOW_PLAYING_QR_CODE_PATH);
 	}
 
 	private static function bufferNextTrack(): void

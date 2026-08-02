@@ -128,6 +128,13 @@ class Track extends Model
 		);
 	}
 
+	protected function url(): Attribute
+	{
+		return Attribute::make(
+			get: fn () => url("/tracks/{$this->hash}")
+		);
+	}
+
 	protected function lastPlayedForHumans(): Attribute
 	{
 		// TODO: I think we can just use diffForHumans - Jippity gave me this snippet

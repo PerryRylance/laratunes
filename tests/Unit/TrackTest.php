@@ -99,4 +99,15 @@ class TrackTest extends TestCase
 			'duplicate_id' => $duplicate->id,
 		]);
 	}
+
+	public function testUrl(): void
+	{
+		$hash = md5('test');
+		$track = Track::factory()->create([
+			'hash' => $hash,
+		]);
+		$expected = url("/tracks/$hash");
+
+		$this->assertEquals($expected, $track->url);
+	}
 }
