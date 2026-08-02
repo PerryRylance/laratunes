@@ -54,11 +54,31 @@ class DiscoverMediaCallout extends Widget
 
 	private function files(): Collection
 	{
-		return (new Collection(Storage::disk('media')->allFiles()))
+		return static::scan()
 			->filter(fn (string $file) => in_array(
 				strtolower(pathinfo($file, PATHINFO_EXTENSION)), Track::SUPPORTED_EXTENSIONS
 			))
 			->values();
+	}
+
+	private static function scan(string $directory = ''): Collection
+	{
+		$disk = Storage::disk('media');
+
+		$files = new Collection($disk->files($directory));
+
+		foreach ($disk->directories($directory) as $subdirectory)
+		{
+			// NB: Never descend into hidden/dot directories - eg. the scratch folder duplicate
+			// pre-checks might leave behind. Listing top-level directory names doesn't require
+			// reading their contents, so this is safe even if such a directory has locked-down permissions.
+			if (str_starts_with(basename($subdirectory), '.'))
+			continue;
+
+			$files = $files->merge(static::scan($subdirectory));
+		}
+
+		return $files;
 	}
 
 	public function discover(): void

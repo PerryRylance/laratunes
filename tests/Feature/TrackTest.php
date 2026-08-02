@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Contracts\OlafContract;
+use App\Facades\Olaf;
 use App\Filament\Resources\Tracks\Pages\CreateTrack;
 use App\Filament\Resources\Tracks\Pages\EditTrack;
 use App\Filament\Resources\Tracks\Pages\ListTracks;
@@ -12,6 +14,8 @@ use App\Filament\Widgets\FileMissingCallout;
 use App\Models\Track;
 use App\Models\TrackHasDuplicates;
 use App\Models\User;
+use App\Support\Olaf\QueryResults;
+use App\Support\Olaf\Stats;
 use Carbon\Carbon;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DeleteAction;
@@ -19,10 +23,12 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Notifications\Notification;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use RuntimeException;
 use Tests\AdminTestCase;
 
 class TrackTest extends AdminTestCase
@@ -104,6 +110,80 @@ class TrackTest extends AdminTestCase
 	{
 		Livewire::test(CreateTrack::class)
 			->assertOk();
+	}
+
+	public function testWarnsAboutPossibleDuplicateBeforeCreate(): void
+	{
+		// NB: Tests\Mocks\Olaf::query() always reports a match against 'fake.mp3' regardless of input,
+		// so a Track at that path is what makes this scenario resolve to a real duplicate.
+		Track::factory()->uploaded(dst: 'fake.mp3')->create();
+
+		$file = UploadedFile::fake()->create('new-upload.mp3', 100, 'audio/mpeg');
+
+		// NB: fillForm() deliberately suppresses afterStateUpdated() for file uploads during testing,
+		// so set() is used directly here to simulate what a real browser upload triggers.
+		Livewire::test(CreateTrack::class)
+			->set('data.attachment', $file);
+
+		Notification::assertNotified('Possible duplicate track found');
+
+		$this->assertDatabaseMissing(Track::class, [
+			'path' => 'new-upload.mp3',
+		]);
+	}
+
+	public function testDoesNotWarnWhenNoDuplicateMatchExists(): void
+	{
+		$file = UploadedFile::fake()->create('new-upload.mp3', 100, 'audio/mpeg');
+
+		Livewire::test(CreateTrack::class)
+			->set('data.attachment', $file);
+
+		Notification::assertNotNotified('Possible duplicate track found');
+	}
+
+	public function testDuplicateCheckCleansUpItsScratchFile(): void
+	{
+		Track::factory()->uploaded(dst: 'fake.mp3')->create();
+
+		$file = UploadedFile::fake()->create('new-upload.mp3', 100, 'audio/mpeg');
+
+		Livewire::test(CreateTrack::class)
+			->set('data.attachment', $file);
+
+		$leftovers = collect(Storage::disk('media')->allFiles())
+			->filter(fn (string $path) => str_starts_with(basename($path), '.duplicate-check-'));
+
+		$this->assertCount(0, $leftovers);
+	}
+
+	public function testDuplicateCheckFailsOpenWhenOlafIsUnreachable(): void
+	{
+		Olaf::swap(new class implements OlafContract {
+			public static function reset(): void {}
+
+			public static function stats(): Stats
+			{
+				return new Stats('');
+			}
+
+			public static function fingerprint(string $filename): void {}
+
+			public static function query(string $filename): QueryResults
+			{
+				throw new RuntimeException('Simulated Olaf outage');
+			}
+
+			public static function delete(string $filename): void {}
+		});
+
+		$file = UploadedFile::fake()->create('new-upload.mp3', 100, 'audio/mpeg');
+
+		Livewire::test(CreateTrack::class)
+			->set('data.attachment', $file)
+			->assertOk();
+
+		Notification::assertNotNotified('Possible duplicate track found');
 	}
 
 	public function testCreate(): void

@@ -6,6 +6,7 @@ use App\Facades\Olaf;
 use App\Filament\Resources\Tracks\Pages\CreateTrack;
 use App\Models\Track;
 use App\Models\TrackHasDuplicates;
+use Filament\Notifications\Notification;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Kiwilan\Audio\Audio;
@@ -173,6 +174,49 @@ class OlafTest extends TestCase
 
 		$this->assertEquals($track->id, $original->duplicates->first()->id);
 		$this->assertEquals($track->originals->first()->id, $original->id);
+	}
+
+	public function testWarnsAboutDuplicateBeforeTrackIsCreated(): void
+	{
+		$source = TestFiles::all()->first();
+		$extension = pathinfo($source, PATHINFO_EXTENSION);
+		$content = file_get_contents("./tests/Fixtures/media/$source");
+
+		Track::factory()->uploaded($source)->create();
+
+		// NB: Need to slightly modify the file so that it doesn't have an identical hash, matching
+		// how testCreatingTrackIdentifiesDuplicate does it above - we want Olaf's fuzzy audio match here, not the cheap hash check.
+		$modified = tempnam(sys_get_temp_dir(), 'duplicate').".$extension";
+
+		file_put_contents($modified, $content);
+
+		$audio = Audio::read($modified);
+
+		$audio
+			->write()
+			->comment('Make it so that this duplicate file does not have the same hash as the original')
+			->save();
+
+		$content = file_get_contents($modified);
+
+		$upload = UploadedFile::fake()->createWithContent('pre-save-duplicate.'.$extension, $content);
+
+		// NB: fillForm() deliberately suppresses afterStateUpdated() for file uploads during testing,
+		// so set() is used directly here to simulate what a real browser upload triggers.
+		Livewire::test(CreateTrack::class)
+			->set('data.attachment', $upload);
+
+		Notification::assertNotified('Possible duplicate track found');
+
+		// NB: This is the crux of the feature - the warning must fire before the record exists.
+		$this->assertDatabaseMissing(Track::class, [
+			'path' => 'pre-save-duplicate.'.$extension,
+		]);
+
+		$leftovers = collect(Storage::disk('media')->allFiles())
+			->filter(fn (string $path) => str_starts_with(basename($path), '.duplicate-check-'));
+
+		$this->assertCount(0, $leftovers);
 	}
 
 	public function testDeletingTrackRemovesFromOlaf(): void

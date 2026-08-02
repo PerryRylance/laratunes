@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Filament\Resources\Tracks\TrackResource;
 use App\Observers\TrackObserver;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
@@ -118,6 +119,13 @@ class Track extends Model
 				->select('duplicate_id')
 				->from(TrackHasDuplicates::getTableName())
 			);
+	}
+
+	protected function adminUrl(): Attribute
+	{
+		return Attribute::make(
+			get: fn () => TrackResource::getUrl('view', ['record' => $this])
+		);
 	}
 
 	protected function lastPlayedForHumans(): Attribute
