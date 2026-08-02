@@ -45,11 +45,14 @@ class TrackObserver
 		if ($duplicates->items->isEmpty())
 		return;
 
-		$paths = $duplicates->items->pluck('file')->unique();
-		$tracks = Track::whereIn('path', $paths)->get();
+		$confidenceByPath = $duplicates->items->pluck('confidence', 'file');
+
+		$tracks = Track::whereIn('path', $confidenceByPath->keys())->get();
 
 		foreach ($tracks as $original)
-			$original->duplicates()->attach($track);
+			$original->duplicates()->attach($track, [
+				'confidence' => $confidenceByPath[$original->path] ?? null,
+			]);
 	}
 
 	public function deleting(Track $track): void

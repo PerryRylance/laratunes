@@ -9,6 +9,7 @@ use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
@@ -34,6 +35,12 @@ class DuplicatesRelationManager extends RelationManager
 	{
 		return $table
 			->heading('Duplicates')
+			// NB: pushColumns(), not columns() - this table's other columns come from
+			// TrackResource via $relatedResource, and columns() would wipe those out.
+			->pushColumns([
+				TextColumn::make('pivot.confidence')
+					->label('Confidence'),
+			])
 			->headerActions([
 				AttachAction::make(),
 			])

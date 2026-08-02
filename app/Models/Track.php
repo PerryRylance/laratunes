@@ -84,12 +84,16 @@ class Track extends Model
 
 	public function duplicates(): BelongsToMany
 	{
-		return $this->belongsToMany(Track::class, 'track_has_duplicates', 'original_id', 'duplicate_id');
+		return $this->belongsToMany(Track::class, 'track_has_duplicates', 'original_id', 'duplicate_id')
+			->using(TrackHasDuplicates::class)
+			->withPivot('confidence');
 	}
 
 	public function originals(): BelongsToMany
 	{
-		return $this->belongsToMany(Track::class, 'track_has_duplicates', 'duplicate_id', 'original_id');
+		return $this->belongsToMany(Track::class, 'track_has_duplicates', 'duplicate_id', 'original_id')
+			->using(TrackHasDuplicates::class)
+			->withPivot('confidence');
 	}
 
 	#[Scope]

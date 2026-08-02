@@ -531,6 +531,22 @@ class TrackTest extends AdminTestCase
 			->assertCanSeeTableRecords([$duplicate]);
 	}
 
+	public function testCanSeeConfidenceInDuplicatesTable(): void
+	{
+		[$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+		$original->duplicates()->attach($duplicate, ['confidence' => 456]);
+
+		$page = Livewire::test(DuplicatesRelationManager::class, [
+			'ownerRecord' => $original,
+			'pageClass' => ViewTrack::class,
+		]);
+
+		$record = $page->instance()->getTableRecords()->first();
+
+		$page->assertTableColumnFormattedStateSet('pivot.confidence', 456, $record);
+	}
+
 	public function testViewShowsOriginals(): void
 	{
 		[$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
@@ -556,6 +572,22 @@ class TrackTest extends AdminTestCase
 			'pageClass' => ViewTrack::class,
 		])
 			->assertCanSeeTableRecords([$original]);
+	}
+
+	public function testCanSeeConfidenceInOriginalsTable(): void
+	{
+		[$original, $duplicate] = Track::factory()->uploaded()->count(2)->create();
+
+		$original->duplicates()->attach($duplicate, ['confidence' => 456]);
+
+		$page = Livewire::test(OriginalsRelationManager::class, [
+			'ownerRecord' => $duplicate,
+			'pageClass' => ViewTrack::class,
+		]);
+
+		$record = $page->instance()->getTableRecords()->first();
+
+		$page->assertTableColumnFormattedStateSet('pivot.confidence', 456, $record);
 	}
 
 	public function testCanSeeDuplicateCountInTable(): void
