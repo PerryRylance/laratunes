@@ -11,6 +11,7 @@ use App\Filament\Resources\Tracks\Pages\ViewTrack;
 use App\Filament\Resources\Tracks\RelationManagers\DuplicatesRelationManager;
 use App\Filament\Resources\Tracks\RelationManagers\OriginalsRelationManager;
 use App\Filament\Widgets\FileMissingCallout;
+use App\Jobs\DeleteTrackJob;
 use App\Models\Track;
 use App\Models\TrackHasDuplicates;
 use App\Models\User;
@@ -26,6 +27,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Notifications\Notification;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Livewire\Mechanisms\ComponentRegistry;
@@ -381,6 +383,9 @@ class TrackTest extends AdminTestCase
 	{
 		$track = Track::factory()->uploaded()->create();
 
+		Queue::fake();
+		Olaf::shouldReceive('delete')->never();
+
 		Livewire::test(EditTrack::class, [
 			'record' => $track->id,
 		])
@@ -389,12 +394,41 @@ class TrackTest extends AdminTestCase
 			->assertRedirect();
 
 		$this->assertDatabaseMissing($track);
-		$this->assertFalse(Storage::disk('media')->exists($track->path));
+	}
+
+	public function testDeleteDoesNotDeleteTheFileSynchronously(): void
+	{
+		$track = Track::factory()->uploaded()->create();
+
+		Queue::fake();
+
+		Livewire::test(EditTrack::class, [
+			'record' => $track->id,
+		])
+			->callAction(DeleteAction::class);
+
+		$this->assertTrue(Storage::disk('media')->exists($track->path));
+	}
+
+	public function testDeleteQueuesDeleteTrackJob(): void
+	{
+		$track = Track::factory()->uploaded()->create();
+
+		Queue::fake();
+
+		Livewire::test(EditTrack::class, [
+			'record' => $track->id,
+		])
+			->callAction(DeleteAction::class);
+
+		Queue::assertPushed(DeleteTrackJob::class, fn (DeleteTrackJob $job) => $job->path === $track->path);
 	}
 
 	public function testBulkDelete(): void
 	{
 		$tracks = Track::factory()->uploaded()->count(3)->create();
+
+		Queue::fake();
 
 		Livewire::test(ListTracks::class)
 			->assertCanSeeTableRecords($tracks)
@@ -405,7 +439,9 @@ class TrackTest extends AdminTestCase
 
 		$tracks->each(function (Track $track) {
 			$this->assertDatabaseMissing($track);
-			$this->assertFalse(Storage::disk('media')->exists($track->path));
+			$this->assertTrue(Storage::disk('media')->exists($track->path));
+
+			Queue::assertPushed(DeleteTrackJob::class, fn (DeleteTrackJob $job) => $job->path === $track->path);
 		});
 	}
 

@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Facades\Olaf;
+use App\Jobs\DeleteTrackJob;
 use App\Models\Track;
 use Illuminate\Support\Facades\Storage;
 use Kiwilan\Audio\Audio;
@@ -57,7 +58,8 @@ class TrackObserver
 
 	public function deleting(Track $track): void
 	{
-		Olaf::delete($track->path);
-		Storage::disk('media')->delete($track->path);
+		// NB: Olaf::delete() is a slow operation (it has to rebuild an index) - queuing it here keeps
+		// the delete request from timing out. See DeleteTrackJob for the actual Olaf/file cleanup.
+		DeleteTrackJob::dispatch($track->path);
 	}
 }

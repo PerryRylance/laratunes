@@ -4,6 +4,7 @@ namespace Tests\Integration;
 
 use App\Facades\Olaf;
 use App\Filament\Resources\Tracks\Pages\CreateTrack;
+use App\Jobs\DeleteTrackJob;
 use App\Models\Track;
 use App\Models\TrackHasDuplicates;
 use Filament\Notifications\Notification;
@@ -226,6 +227,11 @@ class OlafTest extends TestCase
 		$this->assertEquals(1, Olaf::stats()->numberOfSongs);
 
 		$track->delete();
+
+		// NB: Olaf removal now happens in a queued DeleteTrackJob rather than inline (it's too slow
+		// to run within the delete request), so it has to be run explicitly here rather than relying
+		// on a worker to pick it up.
+		(new DeleteTrackJob($track->path))->handle();
 
 		$this->assertEquals(0, Olaf::stats()->numberOfSongs);
 	}
