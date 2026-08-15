@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\YtDlpException;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
@@ -48,6 +49,8 @@ class YtDlpService
 	public static function install(): void
 	{
 		$binary = config('yt-dlp.binary_path');
+
+		File::ensureDirectoryExists(dirname($binary));
 
 		$result = Process::timeout(config('yt-dlp.timeout'))->run([
 			'curl', '-fsSL', config('yt-dlp.download_url'), '-o', $binary,
