@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Tracks;
 
 use App\Filament\Resources\Tracks\Pages\CreateTrack;
+use App\Filament\Resources\Tracks\Pages\CreateTrackFromUrl;
 use App\Filament\Resources\Tracks\Pages\EditTrack;
 use App\Filament\Resources\Tracks\Pages\ListTracks;
 use App\Filament\Resources\Tracks\Pages\ViewTrack;
@@ -53,6 +54,7 @@ class TrackResource extends Resource
 		return [
 			'index' => ListTracks::route('/'),
 			'create' => CreateTrack::route('/create'),
+			'create-from-url' => CreateTrackFromUrl::route('/create-from-url'),
 			'view' => ViewTrack::route('/{record}'),
 			'edit' => EditTrack::route('/{record}/edit'),
 		];

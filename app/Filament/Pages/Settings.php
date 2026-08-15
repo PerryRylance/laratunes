@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use App\Exceptions\YtDlpException;
+use App\Facades\YtDlp;
 use App\Models\Setting;
 use BackedEnum;
 use Closure;
@@ -27,9 +29,17 @@ class Settings extends Page implements HasSchemas
 
 	public ?array $data = [];
 
+	public bool $ytdlpInstalled;
+
+	public ?string $ytdlpVersion = null;
+
+	public ?string $ytdlpLatestVersion = null;
+
 	public function mount(): void
 	{
 		$this->form->fill(Setting::getAllAsAssociativeArray());
+
+		$this->refreshYtdlpStatus();
 	}
 
 	public function form(Schema $schema): Schema
@@ -93,5 +103,69 @@ class Settings extends Page implements HasSchemas
 			->success()
 			->title('Settings updated!')
 			->send();
+	}
+
+	public function installYtdlp(): void
+	{
+		try
+		{
+			YtDlp::install();
+
+			Notification::make()
+				->success()
+				->title('yt-dlp installed!')
+				->send();
+		}
+		catch (YtDlpException $exception)
+		{
+			Notification::make()
+				->danger()
+				->title('Failed to install yt-dlp')
+				->body($exception->getMessage())
+				->persistent()
+				->send();
+		}
+
+		$this->refreshYtdlpStatus();
+	}
+
+	public function upgradeYtdlp(): void
+	{
+		try
+		{
+			YtDlp::upgrade();
+
+			Notification::make()
+				->success()
+				->title('yt-dlp upgraded!')
+				->send();
+		}
+		catch (YtDlpException $exception)
+		{
+			Notification::make()
+				->danger()
+				->title('Failed to upgrade yt-dlp')
+				->body($exception->getMessage())
+				->persistent()
+				->send();
+		}
+
+		$this->refreshYtdlpStatus();
+	}
+
+	private function refreshYtdlpStatus(): void
+	{
+		$this->ytdlpInstalled = YtDlp::installed();
+
+		if ($this->ytdlpInstalled)
+		{
+			$this->ytdlpVersion = YtDlp::version();
+			$this->ytdlpLatestVersion = YtDlp::latestVersion();
+		}
+		else
+		{
+			$this->ytdlpVersion = null;
+			$this->ytdlpLatestVersion = null;
+		}
 	}
 }

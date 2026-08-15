@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\YtDlpException;
+use App\Facades\YtDlp;
 use App\Filament\Pages\Settings;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Artisan;
@@ -97,5 +99,83 @@ class SettingsTest extends TestCase
 			]);
 
 		$this->assertNotEquals('http://bad.stream', Setting::value(Setting::STREAM_URL));
+	}
+
+	public function testSeesNotInstalledByDefault(): void
+	{
+		YtDlp::expects('installed')->andReturn(false);
+
+		Livewire::test(Settings::class)
+			->assertSee('Not installed')
+			->assertSee('Install')
+			->assertDontSee('Upgrade');
+	}
+
+	public function testSeesVersionAndUpgradeButtonWhenInstalled(): void
+	{
+		YtDlp::expects('installed')->andReturn(true);
+		YtDlp::expects('version')->andReturn('2024.12.13');
+		YtDlp::expects('latestVersion')->andReturn('2024.12.13');
+
+		Livewire::test(Settings::class)
+			->assertSee('2024.12.13')
+			->assertSee('Upgrade')
+			->assertDontSee('Install');
+	}
+
+	public function testInstallButtonAsksForConfirmation(): void
+	{
+		YtDlp::expects('installed')->andReturn(false);
+
+		Livewire::test(Settings::class)
+			->assertSeeHtml('wire:confirm=');
+	}
+
+	public function testInstallingYtdlpCallsServiceAndNotifies(): void
+	{
+		YtDlp::shouldReceive('installed')->andReturn(false);
+		YtDlp::expects('install')->once();
+
+		Livewire::test(Settings::class)
+			->call('installYtdlp')
+			->assertOk()
+			->assertNotified();
+	}
+
+	public function testInstallingYtdlpShowsErrorOnFailure(): void
+	{
+		YtDlp::shouldReceive('installed')->andReturn(false);
+		YtDlp::expects('install')->once()->andThrow(new YtDlpException('boom', 'Failed to install yt-dlp'));
+
+		Livewire::test(Settings::class)
+			->call('installYtdlp')
+			->assertOk()
+			->assertNotified('Failed to install yt-dlp');
+	}
+
+	public function testUpgradingYtdlpCallsServiceAndNotifies(): void
+	{
+		YtDlp::shouldReceive('installed')->andReturn(true);
+		YtDlp::shouldReceive('version')->andReturn('2024.12.13');
+		YtDlp::shouldReceive('latestVersion')->andReturn('2024.12.13');
+		YtDlp::expects('upgrade')->once();
+
+		Livewire::test(Settings::class)
+			->call('upgradeYtdlp')
+			->assertOk()
+			->assertNotified();
+	}
+
+	public function testUpgradingYtdlpShowsErrorOnFailure(): void
+	{
+		YtDlp::shouldReceive('installed')->andReturn(true);
+		YtDlp::shouldReceive('version')->andReturn('2024.12.13');
+		YtDlp::shouldReceive('latestVersion')->andReturn('2024.12.13');
+		YtDlp::expects('upgrade')->once()->andThrow(new YtDlpException('boom', 'Failed to upgrade yt-dlp'));
+
+		Livewire::test(Settings::class)
+			->call('upgradeYtdlp')
+			->assertOk()
+			->assertNotified('Failed to upgrade yt-dlp');
 	}
 }
