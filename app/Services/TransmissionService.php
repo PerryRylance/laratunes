@@ -184,4 +184,15 @@ class TransmissionService
 	{
 		return preg_match('/ffmpeg.+\/buffers\/now-playing/ms', shell_exec('ps -eo pid,user,args --width 1000'));
 	}
+
+	// NB: The transmission's ffmpeg process reads from the fifo via -i, unlike the buffer's
+	// process which writes to it - that's what distinguishes the two on the process list.
+	// Killing it makes work() throw, which exits the forked process and lets StartBroadcast's
+	// outer loop recover the whole broadcast
+	public static function restart(): void
+	{
+		Log::info('Restarting transmission');
+
+		Ffmpeg::stop('/^\s*(\d+)\s+ffmpeg\b.*-i\s+'.preg_quote(BufferService::NOW_PLAYING_BUFFER_PATH, '/').'\b/');
+	}
 }

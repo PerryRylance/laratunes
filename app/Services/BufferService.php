@@ -131,4 +131,14 @@ class BufferService
 		if ($result->failed())
 			throw new BufferException($process, "Failed to buffer $file ({$result->exitCode()})");
 	}
+
+	// NB: The buffer's ffmpeg process writes to the fifo, so it's the one whose command line
+	// ends with the buffer path. Killing it here is enough - the loop() above will catch the
+	// resulting failure and move on to buffering the next track
+	public static function restart(): void
+	{
+		Log::info('Restarting buffer');
+
+		Ffmpeg::stop('/^\s*(\d+)\s+ffmpeg\b.*'.preg_quote(static::NOW_PLAYING_BUFFER_PATH, '/').'\s*$/');
+	}
 }

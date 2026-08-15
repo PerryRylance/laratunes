@@ -7,6 +7,17 @@
             <flux:callout.text>
                 Stream is being transmitted.
             </flux:callout.text>
+            <flux:button
+                variant="danger"
+                class="self-start"
+                wire:click="restart"
+                wire:confirm="Are you sure you want to restart the broadcast? This will briefly interrupt the stream."
+            >
+                <div class="flex items-center gap-2">
+                    <flux:icon.arrow-path />
+                    Restart Broadcast
+                </div>
+            </flux:button>
         </flux:callout>
     @else
         <flux:callout variant="danger" icon="x-circle">

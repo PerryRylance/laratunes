@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Facades\Buffer;
 use App\Facades\Transmission;
 use App\Filament\Pages\Dashboard;
 use App\Models\Setting;
@@ -38,6 +39,14 @@ class StatusWidget extends Widget
 
 		// TODO: Flash or return error?
 		// TODO: Test out some popular scenarios like connection rejected
+
+		return redirect()->to(Dashboard::getUrl());
+	}
+
+	public function restart()
+	{
+		Buffer::restart();
+		Transmission::restart();
 
 		return redirect()->to(Dashboard::getUrl());
 	}

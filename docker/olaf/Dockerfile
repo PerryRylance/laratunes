@@ -9,11 +9,11 @@ RUN apk update
 #Install dependencies:
 # - ruby to run the Olaf runner script
 # - ffmpeg to convert audio
-# - make, gcc and musl-dev to compile Olaf
+# - make, gcc, musl-dev and zig to compile Olaf
 #
 # The version of each dependency is not that critical
 # The interfaces used should be rather stable over time
-RUN apk add ruby ffmpeg gcc make musl-dev php-cli
+RUN apk add ruby ffmpeg gcc make musl-dev php-cli zig
 
 #Create a temporary directory for the source files
 #and switch to it
@@ -24,7 +24,7 @@ WORKDIR /usr/src/olaf
 COPY . .
 
 #compile and install Olaf
-RUN make && make install-su
+RUN make && make install
 RUN echo "Olaf compiled and installed!"
 
 #Make and switch to the audio directory
