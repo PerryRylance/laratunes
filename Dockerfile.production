@@ -22,7 +22,9 @@ RUN npm install && npm run build
 FROM dunglas/frankenphp:1-php8.4
 
 ARG USER=1000
-RUN apt-get update && apt-get install -y procps ffmpeg gcc libc6-dev
+# NB: curl fetches the yt-dlp release build, and python3 is required to run it - the build we
+# install is a `#!/usr/bin/env python3` script, not a standalone binary
+RUN apt-get update && apt-get install -y procps ffmpeg gcc libc6-dev curl python3
 
 COPY ./docker/8.4/php.ini-production $PHP_INI_DIR/php.ini
 RUN install-php-extensions intl redis pcntl sockets gd
