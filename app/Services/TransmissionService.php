@@ -107,9 +107,9 @@ class TransmissionService
 			'2',
 
 			'-b:v',
-			'2000k', // Steady as a rock, exactly what YouTube ordered!
+			'1000k', // Steady as a rock, exactly what YouTube ordered!
 			'-maxrate',
-			'2000k', // Strict ceiling! No spiking past the defenders!
+			'1000k', // Strict ceiling! No spiking past the defenders!
 			'-bufsize',
 			'4000k', // 2x your bitrate is standard practice for a smooth buffer stream!
 
