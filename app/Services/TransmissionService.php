@@ -82,21 +82,19 @@ class TransmissionService
 
 			// Map audio from overlay video
 			'-map',
-			'1:a',
+			'1:a?',
 
 			// Audio encoding and sync
 			'-c:a',
 			'aac',
 			'-b:a',
-			'384k',
+			'224k',
 			'-ar',
 			'48000', // NB: YouTube expects 48kHz
 			'-ac',
 			'2',
 			'-af',
 			'volume=-1dB,aresample=resampler=soxr',
-			// '-async',
-			// '1',
 
 			// Video encoding and tuning
 			'-c:v',
@@ -107,60 +105,31 @@ class TransmissionService
 			'2',
 
 			'-b:v',
-			'1000k', // Steady as a rock, exactly what YouTube ordered!
+			'1000k',
 			'-maxrate',
-			'1000k', // Strict ceiling! No spiking past the defenders!
+			'1000k',
 			'-bufsize',
-			'4000k', // 2x your bitrate is standard practice for a smooth buffer stream!
-
-			// NB: Only for local capture, not for streaming
-			// '-crf',
-			// '21',
+			'1500k',
 
 			'-pix_fmt',
 			'yuv420p',
-
-			// '-b:v',
-			// '2500k', // NB: YouTube's recommendation, seems to be at odds with the crf though
-			// '-b:v',
-			// '10M', // NB: Recommended for 1080p, probably overkill for this
-
-			// NB: Recommended color space, breaks stream
-			// '-vf',
-			// 'scale=out_color_matrix=bt709',
-			// '-color_primaries',
-			// 'bt709',
-			// '-color_trc bt709',
-			// '-colorspace bt709',
 
 			'-coder',
 			'1',
 			'-preset',
 			'veryfast',
 
-			// '-tune',
-			// 'zerolatency',
-			// NB: 30fps is suggested here https://www.reddit.com/r/ffmpeg/comments/r1qwyy/best_streaming_settings_for_youtube/?rdt=49142 but this breaks the stream
-			// '-r',
-			// '30',
 			'-g',
 			'60', // NB: YouTube wants a keyframe every 2 seconds
-			// '-vsync',
-			// 'passthrough',
+			'-keyint_min',
+			'60',
+
 			'-movflags',
 			'+faststart',
-
-			// Buffering / max delay tuning to reduce choppiness
-			// '-bufsize',
-			// '2M',
-			// '-max_delay',
-			// '500k',
 
 			// Performance tweaks
 			'-threads',
 			'4',
-			// '-cpu-used',
-			// '0',
 
 			// Output format for RTMP
 			'-f',
