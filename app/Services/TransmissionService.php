@@ -94,7 +94,7 @@ class TransmissionService
 			'-ac',
 			'2',
 			'-af',
-			'volume=-1dB,aresample=resampler=soxr',
+			'aresample=resampler=soxr,alimiter=limit=0.9:attack=5:release=50',
 
 			// Video encoding and tuning
 			'-c:v',
