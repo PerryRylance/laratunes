@@ -22,9 +22,25 @@ RUN npm install && npm run build
 FROM dunglas/frankenphp:1-php8.4
 
 ARG USER=1000
+ARG TARGETARCH
+
 # NB: curl fetches the yt-dlp release build, and python3 is required to run it - the build we
 # install is a `#!/usr/bin/env python3` script, not a standalone binary
-RUN apt-get update && apt-get install -y procps ffmpeg gcc libc6-dev curl python3
+RUN apt-get update && apt-get install -y procps ffmpeg gcc libc6-dev curl python3 unzip
+
+# NB: yt-dlp needs a JS runtime to solve YouTube's signature challenges, or downloads fail with a
+# 403 - deno is yt-dlp's highest-priority, enabled-by-default runtime (see --js-runtimes), and
+# ships as a single self-contained binary, so it's installed the same way as yt-dlp itself rather
+# than pulling in the full node/npm toolchain.
+RUN case "${TARGETARCH}" in \
+        amd64) DENO_ARCH=x86_64 ;; \
+        arm64) DENO_ARCH=aarch64 ;; \
+        *) echo "Unsupported architecture: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac \
+    && curl -fsSL "https://github.com/denoland/deno/releases/latest/download/deno-${DENO_ARCH}-unknown-linux-gnu.zip" -o /tmp/deno.zip \
+    && unzip /tmp/deno.zip -d /usr/local/bin \
+    && chmod +x /usr/local/bin/deno \
+    && rm /tmp/deno.zip
 
 COPY ./docker/8.4/php.ini-production $PHP_INI_DIR/php.ini
 RUN install-php-extensions intl redis pcntl sockets gd
