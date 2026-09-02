@@ -7,6 +7,7 @@ use App\Facades\YtDlp;
 use App\Filament\Resources\Tracks\TrackResource;
 use App\Models\Track;
 use Dom\HTMLDocument;
+use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -75,37 +76,33 @@ class CreateTrackFromUrl extends CreateRecord
 		return $track;
 	}
 
-	// NB: Sends the failure notification (with a "Download log" link when raw yt-dlp output is
+	// NB: Sends the failure notification (with a "Download log" action when raw yt-dlp output is
 	// available) then throws Halt, which Filament's CreateRecord::create() catches to abort the
 	// save and re-render the same form - keeping the url/artist/title fields exactly as submitted.
+	//
+	// The log is offered as a Notification action (rendered directly, not as HTML) rather than as
+	// an <a> embedded in the body: Notification::body() is passed through Filament's HTML
+	// sanitizer, which strips href attributes using schemes (like data:) that aren't on its
+	// allowlist - so a data: URI link placed in the body silently loses its href.
 	private function failDownload(string $reason, string $log): never
 	{
-		$document = HTMLDocument::createEmpty();
-
-		$container = $document->createElement('div');
-		$document->appendChild($container);
-
-		$p = $document->createElement('p');
-		$p->append($document->createTextNode($reason));
-		$container->appendChild($p);
+		$notification = Notification::make()
+			->danger()
+			->title('Download failed')
+			->body($reason)
+			->persistent();
 
 		if ($log !== '')
 		{
-			$a = $document->createElement('a');
-
-			$a->setAttribute('download', 'yt-dlp-log.txt');
-			$a->setAttribute('href', 'data:text/plain;charset=utf-8,'.rawurlencode($log));
-			$a->append($document->createTextNode('Download log'));
-
-			$container->appendChild($a);
+			$notification->actions([
+				Action::make('downloadLog')
+					->label('Download log')
+					->url('data:text/plain;charset=utf-8,'.rawurlencode($log))
+					->extraAttributes(['download' => 'yt-dlp-log.txt']),
+			]);
 		}
 
-		Notification::make()
-			->danger()
-			->title('Download failed')
-			->body($document->saveHtml($container))
-			->persistent()
-			->send();
+		$notification->send();
 
 		throw new Halt;
 	}
@@ -118,7 +115,7 @@ class CreateTrackFromUrl extends CreateRecord
 		$originals = $track->originals()->get()->sortByDesc(fn (Track $original) => $original->pivot->confidence ?? 0);
 
 		if ($originals->isEmpty())
-			return;
+		return;
 
 		$document = HTMLDocument::createEmpty();
 

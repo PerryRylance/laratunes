@@ -121,8 +121,15 @@ class CreateTrackFromUrlTest extends AdminTestCase
 		$notification = $component->notifications->first(fn (Notification $notification) => $notification->getTitle() === 'Download failed');
 
 		$this->assertNotNull($notification);
-		$this->assertStringContainsString('download="yt-dlp-log.txt"', $notification->getBody());
-		$this->assertStringContainsString(rawurlencode('ERROR: Video unavailable'), $notification->getBody());
+
+		// NB: The log link must be a Notification action rather than an <a> in the body - the body
+		// is passed through Filament's HTML sanitizer, which strips href attributes using schemes
+		// (like data:) that aren't on its allowlist.
+		$action = $notification->getActions()[0];
+
+		$this->assertSame('Download log', $action->getLabel());
+		$this->assertSame('yt-dlp-log.txt', $action->getExtraAttributes()['download'] ?? null);
+		$this->assertStringContainsString(rawurlencode('ERROR: Video unavailable'), $action->getUrl());
 	}
 
 	public function testRejectsExactDuplicateDownload(): void
