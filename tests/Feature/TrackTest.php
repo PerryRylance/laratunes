@@ -475,6 +475,49 @@ class TrackTest extends AdminTestCase
 		$this->assertLessThanOrEqual(1, $now->diffInSeconds($track->last_played_at, true));
 	}
 
+	public function testNextDecrementsAvailability(): void
+	{
+		$track = Track::factory()->uploaded()->unplayed()->create();
+
+		Track::next();
+
+		$track->refresh();
+
+		$this->assertEquals(0, $track->available);
+	}
+
+	public function testNextOnlySelectsFromAvailableTracks(): void
+	{
+		Track::factory()->uploaded()->unplayed()->create(['available' => 0]);
+		$track = Track::factory()->uploaded()->unplayed()->create();
+
+		$actual = Track::next();
+
+		$this->assertTrue($actual->is($track));
+	}
+
+	public function testNextDoesNotResetAvailabilityWhileTracksRemainAvailable(): void
+	{
+		$exhausted = Track::factory()->uploaded()->unplayed()->create(['available' => 0]);
+		Track::factory()->uploaded()->unplayed()->create();
+
+		Track::next();
+
+		$exhausted->refresh();
+
+		$this->assertEquals(0, $exhausted->available);
+	}
+
+	public function testNextResetsAvailabilityWhenAllTracksAreExhausted(): void
+	{
+		Track::factory()->uploaded()->unplayed()->count(3)->create(['available' => 0]);
+
+		$picked = Track::next();
+
+		$this->assertEquals(0, $picked->available);
+		$this->assertEquals(2, Track::where('available', '>', 0)->count());
+	}
+
 	public function testCanViewPath(): void
 	{
 		$track = Track::factory()->uploaded()->create();

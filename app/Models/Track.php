@@ -31,6 +31,7 @@ class Track extends Model
 
 	protected $attributes = [
 		'plays' => 0,
+		'available' => 1,
 	];
 
 	protected $fillable = [
@@ -40,6 +41,7 @@ class Track extends Model
 		'hash',
 		'plays',
 		'last_played_at',
+		'available',
 	];
 
 	public static function createFromFile(string $relative): Track
@@ -68,7 +70,12 @@ class Track extends Model
 
 	public static function next(): Track
 	{
-		$track = Track::orderBy('plays')->inRandomOrder()->firstOrFail();
+		if (! Track::where('available', '>', 0)->exists())
+			Track::query()->update(['available' => 1]);
+
+		$track = Track::where('available', '>', 0)->inRandomOrder()->firstOrFail();
+
+		$track->decrement('available');
 
 		$track->increment('plays', 1, [
 			'last_played_at' => Carbon::now(),
