@@ -8,6 +8,7 @@ use App\Filament\Widgets\CpuUsageChart;
 use App\Filament\Widgets\DiscoverMediaCallout;
 use App\Filament\Widgets\MemoryUsageChart;
 use App\Filament\Widgets\StatusWidget;
+use App\Filament\Widgets\TrackAvailabilityChart;
 use App\Filament\Widgets\TransmissionBitrateChart;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -28,6 +29,7 @@ class AdminPanelProvider extends PanelProvider
 	public function panel(Panel $panel): Panel
 	{
 		$charts = [
+			TrackAvailabilityChart::class,
 			CpuUsageChart::class,
 			TransmissionBitrateChart::class,
 			BufferUsageChart::class,
