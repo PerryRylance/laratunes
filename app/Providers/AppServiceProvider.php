@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\DurationService;
 use App\Services\FfmpegService;
 use App\Services\FifoService;
 use App\Services\NowPlayingService;
@@ -57,6 +58,7 @@ class AppServiceProvider extends ServiceProvider
 		});
 
 		$this->app->singleton(OlafService::class, fn () => new OlafService);
+		$this->app->singleton(DurationService::class, fn () => new DurationService);
 		$this->app->singleton(NowPlayingService::class, fn () => new NowPlayingService);
 		$this->app->singleton(FfmpegService::class, fn () => new FfmpegService);
 		$this->app->singleton(FifoService::class, fn () => new FifoService);

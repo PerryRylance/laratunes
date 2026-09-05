@@ -23,6 +23,19 @@ class FfmpegService
 		});
 	}
 
+	public static function getDuration(string $path): int
+	{
+		$output = Process::run([
+			'ffprobe',
+			'-v', 'error',
+			'-show_entries', 'format=duration',
+			'-of', 'default=noprint_wrappers=1:nokey=1',
+			$path,
+		])->output();
+
+		return (int) round((float) trim($output));
+	}
+
 	// NB: Finds ffmpeg processes whose command line matches $pattern and kills them, so a
 	// stuck buffer or transmission can be recovered without the caller needing to know its pid
 	public static function stop(string $pattern): void
@@ -32,7 +45,7 @@ class FfmpegService
 		foreach (preg_split('/\r?\n/', trim($output)) as $line)
 		{
 			if (! preg_match($pattern, $line, $m))
-				continue;
+			continue;
 
 			Process::run(['kill', '-9', $m[1]]);
 		}

@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Facades\Duration;
 use App\Facades\Olaf;
 use App\Jobs\DeleteTrackJob;
 use App\Models\Track;
@@ -35,6 +36,13 @@ class TrackObserver
 
 	public function created(Track $track): void
 	{
+		$path = Storage::disk('media')->path($track->path);
+
+		$track->duration = Duration::getDurationFromFile($path);
+		$track->save();
+
+		Duration::invalidateCachedTrackTotalDuration();
+
 		// NB: Give this more headroom than the Guzzle timeout so Guzzle - not PHP's own execution
 		// limit - is what decides when a slow Olaf request gives up.
 		set_time_limit(config('olaf.timeout') + 30);
@@ -58,6 +66,8 @@ class TrackObserver
 
 	public function deleting(Track $track): void
 	{
+		Duration::invalidateCachedTrackTotalDuration();
+
 		// NB: Olaf::delete() is a slow operation (it has to rebuild an index) - queuing it here keeps
 		// the delete request from timing out. See DeleteTrackJob for the actual Olaf/file cleanup.
 		DeleteTrackJob::dispatch($track->path);

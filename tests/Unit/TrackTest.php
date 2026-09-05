@@ -2,8 +2,10 @@
 
 namespace Tests\Unit;
 
+use App\Facades\Ffmpeg;
 use App\Models\Track;
 use App\Models\TrackHasDuplicates;
+use App\Services\DurationService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Tests\TestCase;
 use Tests\TestFiles;
@@ -109,5 +111,36 @@ class TrackTest extends TestCase
 		$expected = url("/tracks/$hash");
 
 		$this->assertEquals($expected, $track->url);
+	}
+
+	public function testCreatingATrackStoresItsDuration(): void
+	{
+		Ffmpeg::shouldReceive('getDuration')->once()->andReturn(180);
+
+		$track = Track::factory()->uploaded()->create();
+
+		$this->assertEquals(180, $track->fresh()->duration);
+	}
+
+	public function testCreatingATrackUpdatesTheCachedTotalDuration(): void
+	{
+		Ffmpeg::shouldReceive('getDuration')->once()->andReturn(180);
+
+		Track::factory()->uploaded()->create();
+
+		$this->assertEquals(180, DurationService::getTracksTotalDuration());
+	}
+
+	public function testDeletingATrackInvalidatesTheCachedTotalDuration(): void
+	{
+		Ffmpeg::shouldReceive('getDuration')->once()->andReturn(180);
+
+		$track = Track::factory()->uploaded()->create();
+
+		$this->assertEquals(180, DurationService::getTracksTotalDuration());
+
+		$track->delete();
+
+		$this->assertEquals(0, DurationService::getTracksTotalDuration());
 	}
 }

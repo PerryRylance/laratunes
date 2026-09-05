@@ -32,6 +32,7 @@ class Track extends Model
 	protected $attributes = [
 		'plays' => 0,
 		'available' => 1,
+		'duration' => 0,
 	];
 
 	protected $fillable = [
@@ -42,6 +43,7 @@ class Track extends Model
 		'plays',
 		'last_played_at',
 		'available',
+		'duration',
 	];
 
 	public static function createFromFile(string $relative): Track

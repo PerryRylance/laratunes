@@ -9,6 +9,7 @@ use App\Filament\Widgets\DiscoverMediaCallout;
 use App\Filament\Widgets\MemoryUsageChart;
 use App\Filament\Widgets\StatusWidget;
 use App\Filament\Widgets\TrackAvailabilityChart;
+use App\Filament\Widgets\TrackStatsOverview;
 use App\Filament\Widgets\TransmissionBitrateChart;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -37,6 +38,7 @@ class AdminPanelProvider extends PanelProvider
 		];
 
 		$widgets = [
+			TrackStatsOverview::class,
 			ConfigureStreamCallout::class,
 			DiscoverMediaCallout::class,
 		];
