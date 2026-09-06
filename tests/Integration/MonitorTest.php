@@ -154,6 +154,33 @@ class MonitorTest extends TestCase
 			$this->assertCount(30, Monitor::list($key));
 	}
 
+	public function testIsRunningIsFalseWhenNeverUpdated(): void
+	{
+		Redis::shouldReceive('get')
+			->with('monitor:updated_at')
+			->andReturn(null);
+
+		$this->assertFalse(Monitor::isRunning());
+	}
+
+	public function testIsRunningIsTrueWhenRecentlyUpdated(): void
+	{
+		Redis::shouldReceive('get')
+			->with('monitor:updated_at')
+			->andReturn((new DateTime)->format(DateTime::ATOM));
+
+		$this->assertTrue(Monitor::isRunning());
+	}
+
+	public function testIsRunningIsFalseWhenLastUpdateIsStale(): void
+	{
+		Redis::shouldReceive('get')
+			->with('monitor:updated_at')
+			->andReturn((new DateTime)->modify('-1 hour')->format(DateTime::ATOM));
+
+		$this->assertFalse(Monitor::isRunning());
+	}
+
 	public function testNotifyOnHighCpu(): void {}
 
 	public function testNotifyOnHighMemory(): void {}

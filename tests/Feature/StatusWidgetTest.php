@@ -2,7 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Facades\Buffer;
+use App\Exceptions\BroadcastSupervisorException;
+use App\Facades\BroadcastSupervisor;
 use App\Facades\Transmission;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Widgets\StatusWidget;
@@ -43,19 +44,40 @@ class StatusWidgetTest extends AdminTestCase
 			->assertSeeHtml('wire:confirm=');
 	}
 
-	public function testRestartingRestartsTheBufferAndTransmissionServices(): void
+	public function testRestartingRestartsTheWholeSupervisor(): void
 	{
 		Transmission::expects('running')
 			->andReturn(true);
 
-		Buffer::expects('restart')
-			->once();
-
-		Transmission::expects('restart')
+		BroadcastSupervisor::expects('start')
 			->once();
 
 		Livewire::test(StatusWidget::class)
 			->call('restart')
 			->assertRedirect(Dashboard::getUrl());
+	}
+
+	public function testStartingBroadcastStartsTheWholeSupervisor(): void
+	{
+		BroadcastSupervisor::expects('start')
+			->once();
+
+		Livewire::test(StatusWidget::class)
+			->call('broadcast')
+			->assertRedirect(Dashboard::getUrl());
+	}
+
+	public function testRestartShowsAnErrorNotificationWhenTheSupervisorFailsToComeUp(): void
+	{
+		Transmission::shouldReceive('running')
+			->andReturn(true);
+
+		BroadcastSupervisor::expects('start')
+			->once()
+			->andThrow(new BroadcastSupervisorException('did not come up'));
+
+		Livewire::test(StatusWidget::class)
+			->call('restart')
+			->assertNotified('Failed to restart the broadcast');
 	}
 }

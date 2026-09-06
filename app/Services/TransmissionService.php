@@ -156,12 +156,22 @@ class TransmissionService
 
 	// NB: The transmission's ffmpeg process reads from the fifo via -i, unlike the buffer's
 	// process which writes to it - that's what distinguishes the two on the process list.
-	// Killing it makes work() throw, which exits the forked process and lets StartBroadcast's
-	// outer loop recover the whole broadcast
+	private static function processPattern(): string
+	{
+		return '/^\s*(\d+)\s+ffmpeg\b.*-i\s+'.preg_quote(BufferService::NOW_PLAYING_BUFFER_PATH, '/').'\b/';
+	}
+
+	// NB: Killing it makes work() throw, which exits the forked process and lets
+	// BroadcastSupervisorService detect the failure and recover the whole broadcast
 	public static function restart(): void
 	{
 		Log::info('Restarting transmission');
 
-		Ffmpeg::stop('/^\s*(\d+)\s+ffmpeg\b.*-i\s+'.preg_quote(BufferService::NOW_PLAYING_BUFFER_PATH, '/').'\b/');
+		Ffmpeg::stop(static::processPattern());
+	}
+
+	public static function isTransmitting(): bool
+	{
+		return Ffmpeg::isRunning(static::processPattern());
 	}
 }

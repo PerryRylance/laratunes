@@ -133,12 +133,23 @@ class BufferService
 	}
 
 	// NB: The buffer's ffmpeg process writes to the fifo, so it's the one whose command line
-	// ends with the buffer path. Killing it here is enough - the loop() above will catch the
-	// resulting failure and move on to buffering the next track
+	// ends with the buffer path.
+	private static function processPattern(): string
+	{
+		return '/^\s*(\d+)\s+ffmpeg\b.*'.preg_quote(static::NOW_PLAYING_BUFFER_PATH, '/').'\s*$/';
+	}
+
+	// NB: Killing it here is enough - the loop() above will catch the resulting failure and move
+	// on to buffering the next track
 	public static function restart(): void
 	{
 		Log::info('Restarting buffer');
 
-		Ffmpeg::stop('/^\s*(\d+)\s+ffmpeg\b.*'.preg_quote(static::NOW_PLAYING_BUFFER_PATH, '/').'\s*$/');
+		Ffmpeg::stop(static::processPattern());
+	}
+
+	public static function isBuffering(): bool
+	{
+		return Ffmpeg::isRunning(static::processPattern());
 	}
 }

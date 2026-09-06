@@ -84,4 +84,33 @@ class TransmissionTest extends TestCase
 
 		Process::assertNotRan(fn (PendingProcess $process) => $process->command === ['kill', '-9', '101']);
 	}
+
+	public function testIsTransmittingIsTrueWhenTheTransmissionProcessIsRunning(): void
+	{
+		$this->fakePs();
+
+		$this->assertTrue(Transmission::isTransmitting());
+	}
+
+	public function testIsTransmittingIsFalseWhenNothingIsRunning(): void
+	{
+		Process::fake([
+			'ps *' => Process::result(output: ''),
+		])->preventStrayProcesses();
+
+		$this->assertFalse(Transmission::isTransmitting());
+	}
+
+	public function testIsTransmittingIsFalseWhenOnlyTheBufferingProcessIsRunning(): void
+	{
+		$path = BufferService::NOW_PLAYING_BUFFER_PATH;
+
+		Process::fake([
+			'ps *' => Process::result(output: <<<OUTPUT
+			    101 ffmpeg -y -i /media/track.mp3 -f lavfi -i color=c=0x00FFFF:s=1920x1080:r=30 -i /tmp/now-playing-qr-code.png -filter_complex [1:v][2:v] overlay -f mpegts $path
+			OUTPUT),
+		])->preventStrayProcesses();
+
+		$this->assertFalse(Transmission::isTransmitting());
+	}
 }

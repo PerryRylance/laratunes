@@ -51,4 +51,33 @@ class BufferTest extends TestCase
 
 		Process::assertNotRan(fn (PendingProcess $process) => is_array($process->command) && $process->command[0] === 'kill');
 	}
+
+	public function testIsBufferingIsTrueWhenTheBufferingProcessIsRunning(): void
+	{
+		$this->fakePs();
+
+		$this->assertTrue(Buffer::isBuffering());
+	}
+
+	public function testIsBufferingIsFalseWhenNothingIsRunning(): void
+	{
+		Process::fake([
+			'ps *' => Process::result(output: ''),
+		])->preventStrayProcesses();
+
+		$this->assertFalse(Buffer::isBuffering());
+	}
+
+	public function testIsBufferingIsFalseWhenOnlyTheTransmissionProcessIsRunning(): void
+	{
+		$path = BufferService::NOW_PLAYING_BUFFER_PATH;
+
+		Process::fake([
+			'ps *' => Process::result(output: <<<OUTPUT
+			    202 ffmpeg -re -stream_loop -1 -fflags +genpts -i /media/background.mp4 -f mpegts -i $path -filter_complex [0:v][1:v] overlay rtmp://stream.example/key
+			OUTPUT),
+		])->preventStrayProcesses();
+
+		$this->assertFalse(Buffer::isBuffering());
+	}
 }

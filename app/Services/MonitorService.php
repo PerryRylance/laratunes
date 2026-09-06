@@ -110,4 +110,19 @@ class MonitorService
 	{
 		Redis::set('monitor:updated_at', (new DateTime)->format(DateTime::ATOM));
 	}
+
+	// NB: The monitor loop doesn't spawn a distinguishable OS process (it's a pcntl_fork() child
+	// running the same PHP image as its siblings), so we tell it's alive by its own heartbeat
+	// instead of by searching the process list like Buffer/Transmission do
+	public static function isRunning(): bool
+	{
+		$updatedAt = Redis::get('monitor:updated_at');
+
+		if (! $updatedAt)
+			return false;
+
+		$staleAfter = (new DateTime)->modify('-'.(static::INTERVAL_SECONDS * 3).' seconds');
+
+		return DateTime::createFromFormat(DateTime::ATOM, $updatedAt) >= $staleAfter;
+	}
 }
