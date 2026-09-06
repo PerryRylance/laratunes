@@ -46,7 +46,7 @@ class Track extends Model
 		'duration',
 	];
 
-	public static function createFromFile(string $relative): Track
+	public static function hashFile(string $relative): string
 	{
 		$path = Storage::disk('media')->path($relative);
 
@@ -56,7 +56,13 @@ class Track extends Model
 		if (! is_file($path))
 			throw new InvalidArgumentException("'$path' is not a file");
 
-		$hash = md5(file_get_contents($path));
+		return md5_file($path);
+	}
+
+	public static function createFromFile(string $relative): Track
+	{
+		$path = Storage::disk('media')->path($relative);
+		$hash = static::hashFile($relative);
 
 		$audio = Audio::read($path);
 

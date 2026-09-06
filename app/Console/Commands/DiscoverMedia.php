@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Facades\Olaf;
 use App\Models\Track;
 use Illuminate\Console\Command;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -72,15 +73,24 @@ class DiscoverMedia extends Command
 			{
 				$bar->setMessage("Adding $file");
 
-				$track = Track::createFromFile($file);
+				try
+				{
+					$track = Track::createFromFile($file);
+				}
+				catch (UniqueConstraintViolationException)
+				{
+					$this->warn(PHP_EOL."{$file} is a byte-for-byte duplicate of an existing track, skipping");
+					$bar->advance();
+
+					continue;
+				}
 
 				foreach ($track->originals as $original)
 					$this->warn(PHP_EOL."{$file} may be a duplicate of {$original->file}");
 
+				$numTracksDiscovered++;
 				$bar->advance();
 			}
-
-			$numTracksDiscovered += count($discovered);
 		}
 
 		$bar->finish();
