@@ -20,10 +20,12 @@ class QueryResults
 		{
 			$record = array_map('trim', $record);
 
-			if ($record[2] !== $filename)
-			continue;
+			// NB: olaf reports query_path as the absolute container path (eg. /root/audio/query.mp3),
+			// so it has to be normalised the same way as the match path below before comparing it
+			// against the relative $filename the caller queried with
+			$queryPath = preg_replace('/^\/root\/audio\//', '', $record[2]);
 
-			if ($record[4] === 'match count (#)')
+			if ($queryPath !== $filename)
 			continue;
 
 			if (empty($record[7]))
