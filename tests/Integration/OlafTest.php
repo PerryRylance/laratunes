@@ -220,6 +220,34 @@ class OlafTest extends TestCase
 		$this->assertCount(0, $leftovers);
 	}
 
+	public function testUploadingLowQualityVersionIsDetectedAsDuplicate(): void
+	{
+		$original = Track::factory()->uploaded('8-bit-takeover-367276.mp3')->create();
+		$duplicate = Track::factory()->uploaded('8-bit-takeover-367276 low quality.mp3')->create();
+
+		$this->assertDatabaseHas(TrackHasDuplicates::class, [
+			'original_id' => $original->id,
+			'duplicate_id' => $duplicate->id,
+		]);
+
+		$this->assertEquals($duplicate->id, $original->duplicates->first()->id);
+		$this->assertEquals($original->id, $duplicate->originals->first()->id);
+	}
+
+	public function testUploadingTrimmedVersionIsDetectedAsDuplicate(): void
+	{
+		$original = Track::factory()->uploaded('8-bit-takeover-367276.mp3')->create();
+		$duplicate = Track::factory()->uploaded('8-bit-takeover-367276 trimmed.mp3')->create();
+
+		$this->assertDatabaseHas(TrackHasDuplicates::class, [
+			'original_id' => $original->id,
+			'duplicate_id' => $duplicate->id,
+		]);
+
+		$this->assertEquals($duplicate->id, $original->duplicates->first()->id);
+		$this->assertEquals($original->id, $duplicate->originals->first()->id);
+	}
+
 	public function testDeletingTrackRemovesFromOlaf(): void
 	{
 		$track = Track::factory()->uploaded()->create();
