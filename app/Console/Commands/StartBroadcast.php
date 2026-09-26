@@ -54,8 +54,10 @@ class StartBroadcast extends Command
 
 				Log::info('All processes launched');
 			}
-			catch (CouldNotManageTask)
+			catch (CouldNotManageTask $e)
 			{
+				Log::error('Broadcast task failed, resuming: '.$e->getMessage());
+
 				if (RateLimiter::tooManyAttempts('resume-broadcast', 10))
 				{
 					$this->fail('Broadcast stopped unexpectedly and could not be resumed, check the logs for more information');

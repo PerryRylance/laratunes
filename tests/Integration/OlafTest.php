@@ -248,6 +248,20 @@ class OlafTest extends TestCase
 		$this->assertEquals($original->id, $duplicate->originals->first()->id);
 	}
 
+	public function testUploadingDifferentRecordingOfSameTuneIsDetectedAsDuplicate(): void
+	{
+		$original = Track::factory()->uploaded('23 - UNIVERSAL - cracktro.mp3')->create();
+		$duplicate = Track::factory()->uploaded('Rob Hubbard and Ben Daglish - Auf Wiedersehen Monty - C64.ogg')->create();
+
+		$this->assertDatabaseHas(TrackHasDuplicates::class, [
+			'original_id' => $original->id,
+			'duplicate_id' => $duplicate->id,
+		]);
+
+		$this->assertEquals($duplicate->id, $original->duplicates->first()->id);
+		$this->assertEquals($original->id, $duplicate->originals->first()->id);
+	}
+
 	public function testDeletingTrackRemovesFromOlaf(): void
 	{
 		$track = Track::factory()->uploaded()->create();
