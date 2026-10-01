@@ -40,10 +40,14 @@ class FfmpegService
 	// or transmission can be recovered without the caller needing to know its pid. Despite the
 	// name, the pattern isn't required to match ffmpeg specifically - BroadcastSupervisorService
 	// reuses this to tear down stray `artisan app:start-broadcast` processes too
-	public static function stop(string $pattern): void
+	// NB: $except lets a caller exclude its own pid, so a process can safely sweep up matches
+	// of a pattern that would otherwise match itself (e.g. a forked app:start-broadcast child
+	// cleaning up after its orphaned siblings without killing itself in the process)
+	public static function stop(string $pattern, array $except = []): void
 	{
 		foreach (static::matchingPids($pattern) as $pid)
-			Process::run(['kill', '-9', $pid]);
+			if (! in_array($pid, $except))
+				Process::run(['kill', '-9', $pid]);
 	}
 
 	public static function isRunning(string $pattern): bool

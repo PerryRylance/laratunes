@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Facades\BroadcastSupervisor;
 use App\Facades\Buffer;
 use App\Facades\Fifo;
 use App\Facades\Transmission;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
-use Spatie\Fork\Exceptions\CouldNotManageTask;
+use Throwable;
 
 class StartBroadcast extends Command
 {
@@ -54,12 +55,19 @@ class StartBroadcast extends Command
 
 				Log::info('All processes launched');
 			}
-			catch (CouldNotManageTask $e)
+			catch (Throwable $e)
 			{
-				Log::error('Broadcast task failed, resuming: '.$e->getMessage());
+				Log::error('Broadcast task failed, resuming: '.$e->getMessage(), [
+					'exception' => $e,
+					...BroadcastSupervisor::diagnostics(),
+				]);
+
+				BroadcastSupervisor::stopStrayChildren();
 
 				if (RateLimiter::tooManyAttempts('resume-broadcast', 10))
 				{
+					Log::critical('Broadcast could not be resumed after repeated failures', BroadcastSupervisor::diagnostics());
+
 					$this->fail('Broadcast stopped unexpectedly and could not be resumed, check the logs for more information');
 					exit(1);
 				}

@@ -104,6 +104,67 @@ class BroadcastSupervisorTest extends TestCase
 		Process::assertRan(fn (PendingProcess $process) => is_string($process->command) && str_contains($process->command, 'app:start-broadcast') && str_contains($process->command, 'nohup'));
 	}
 
+	public function testStopStrayChildrenExcludesItsOwnPidFromTheKill(): void
+	{
+		$ownPid = getmypid();
+
+		Process::fake([
+			'ps *' => Process::result(output: <<<OUTPUT
+			    {$ownPid} php artisan app:start-broadcast
+			    999 php artisan app:start-broadcast
+			OUTPUT),
+			'*kill*' => Process::result(),
+		])->preventStrayProcesses();
+
+		Buffer::expects('restart')->once();
+		Transmission::expects('restart')->once();
+
+		BroadcastSupervisor::stopStrayChildren();
+
+		Process::assertRan(fn (PendingProcess $process) => $process->command === ['kill', '-9', '999']);
+		Process::assertNotRan(fn (PendingProcess $process) => is_array($process->command) && in_array((string) $ownPid, $process->command));
+	}
+
+	public function testStartAlsoStartsTheWatchdogWhenItIsNotAlreadyRunning(): void
+	{
+		$this->fakePs();
+
+		Buffer::expects('restart')->once();
+		Transmission::expects('restart')->once();
+
+		Buffer::expects('isBuffering')->andReturn(true);
+		Transmission::expects('isTransmitting')->andReturn(true);
+		Monitor::expects('isRunning')->andReturn(true);
+
+		BroadcastSupervisor::start();
+
+		Process::assertRan(fn (PendingProcess $process) => is_string($process->command) && str_contains($process->command, 'nohup') && str_contains($process->command, 'app:supervise-broadcast'));
+	}
+
+	public function testStartDoesNotStartASecondWatchdogWhenOneIsAlreadyRunning(): void
+	{
+		Process::fake([
+			'ps *' => Process::result(output: <<<'OUTPUT'
+			    555 php artisan app:start-broadcast
+			    777 php artisan app:supervise-broadcast
+			OUTPUT),
+			'*kill*' => Process::result(),
+			'*nohup*' => Process::result(),
+		])->preventStrayProcesses();
+
+		Buffer::expects('restart')->once();
+		Transmission::expects('restart')->once();
+
+		Buffer::expects('isBuffering')->andReturn(true);
+		Transmission::expects('isTransmitting')->andReturn(true);
+		Monitor::expects('isRunning')->andReturn(true);
+
+		BroadcastSupervisor::start();
+
+		Process::assertRan(fn (PendingProcess $process) => is_string($process->command) && str_contains($process->command, 'nohup') && str_contains($process->command, 'app:start-broadcast'));
+		Process::assertNotRan(fn (PendingProcess $process) => is_string($process->command) && str_contains($process->command, 'nohup') && str_contains($process->command, 'app:supervise-broadcast'));
+	}
+
 	public function testStartThrowsWhenTheSupervisorNeverFullyComesUp(): void
 	{
 		config(['broadcast.startup_timeout' => 0]);
